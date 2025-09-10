@@ -181,16 +181,17 @@ with open("indonesia-prov-clean.geojson", "r", encoding="utf-8") as f:
 
 df_edunocup = pd.read_excel("data.xlsx", sheet_name="edunocup")
 
+
+
+## Sex Overview Table
 df_sex = pd.read_excel("data.xlsx", sheet_name="sex")
 
-# --- Buat HTML table dari df_edunocup ---
 overview_html = df_sex.to_html(
     index=False,
     border=0,
     classes="striped highlight responsive-table"  # kelas2 Materialize
 )
 
-# --- Escape agar aman dimasukkan ke JS template literal ---
 overview_csv = df_sex.to_csv(index=False)
 overview_html = df_sex.head(60).to_html(index=False, border=0, classes="striped highlight responsive-table")
 def _to_js_tpl_literal(s: str) -> str:
@@ -200,6 +201,63 @@ overview_html_js = _to_js_tpl_literal(overview_html)
 
 overview_csv_js = _to_js_tpl_literal(overview_csv)
 csv_filename_sex = "Percentage of STEM University Graduates by Sex 2024.csv"
+
+
+
+## Gen Overview Table
+df_gen = pd.read_excel("data.xlsx", sheet_name="gen")
+
+legend_html = """
+<div class="rse-legend" style="margin-top:8px;font-size:.9rem;color:#6b7280">
+  <span class="chip chip-yellow"></span> 25%≤RSE&lt;50%
+  &nbsp;&nbsp;&nbsp;
+  <span class="chip chip-red"></span> RSE≥50%
+</div>
+"""
+overview_csv_gen = df_gen.to_csv(index=False)
+
+overview_html_gen = df_gen.head(60).to_html(
+    index=False,
+    border=0,
+    classes="striped highlight responsive-table",
+    table_id="gen-table"  
+)
+overview_html_gen += legend_html
+
+
+overview_html_gen_js = _to_js_tpl_literal(overview_html_gen)
+
+overview_csv_gen_js = _to_js_tpl_literal(overview_csv_gen)
+csv_filename_gen = "Percentage of STEM University Graduates by Generation 2024.csv"
+
+
+
+
+## Age Overview Table
+df_age = pd.read_excel("data.xlsx", sheet_name="age")
+
+legend_html = """
+<div class="rse-legend" style="margin-top:8px;font-size:.9rem;color:#6b7280">
+  <span class="chip chip-yellow"></span> 25%≤RSE&lt;50%
+  &nbsp;&nbsp;&nbsp;
+  <span class="chip chip-red"></span> RSE≥50%
+</div>
+"""
+overview_csv_age = df_age.to_csv(index=False)
+
+overview_html_age = df_age.head(60).to_html(
+    index=False,
+    border=0,
+    classes="striped highlight responsive-table",
+    table_id="age-table"  
+)
+overview_html_age += legend_html
+
+
+overview_html_age_js = _to_js_tpl_literal(overview_html_age)
+
+overview_csv_age_js = _to_js_tpl_literal(overview_csv_age)
+csv_filename_age = "Percentage of STEM University Graduates by Age Group 2024.csv"
 
 
 
@@ -514,7 +572,7 @@ card_html = """
       .card-button {
         display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
         width:100%;
-        min-height: 260px;           /* ✅ Tinggi minimal agar label muat */
+        min-height: 260px;          
         border-radius:16px; background:#f0f0f0; color:inherit;
         box-shadow:0 4px 10px rgba(0,0,0,.15);
         cursor:pointer; transition:transform .2s, background .2s, color .2s, box-shadow .2s;
@@ -568,6 +626,22 @@ card_html = """
 
       .blue-text { color:#3498db !important; }
       .gray-text { color:#6b7280 !important; }
+      /* highlight sel */
+      .rse-yellow{ background:#fff3bf !important; }  /* kuning lembut */
+      .rse-red{    background:#ffc9c9 !important; }  /* merah lembut */
+
+      /* legend kecil di bawah tabel */
+      .rse-legend .chip{
+        display:inline-block; width:12px; height:12px;
+        border-radius:2px; vertical-align:middle; margin:0 6px 0 0;
+        border:1px solid rgba(0,0,0,.15);
+      }
+      .rse-legend .chip-yellow{ background:#fff3bf; border-color:#f2c94c; }
+      .rse-legend .chip-red{    background:#ffc9c9; border-color:#ef4444; }
+      .collapsible-body table.responsive-table tbody tr:last-child td,
+      .collapsible-body table.responsive-table tbody tr:last-child th{
+        font-weight: 700 !important;
+      }
     </style>
   </head>
   <body>
@@ -581,12 +655,12 @@ card_html = """
         <div class="cards-grid container" id="cards-grid">
 
           <div class="card-button" role="button" tabindex="0" data-card="c1" data-label="STEM Pathways and Gender Gap">
-            <dotlottie-wc class="lottie" src="https://lottie.host/51a834a6-c752-463e-9d4d-a5ce8a2868ec/GvLk1hszLK.json" speed="1" autoplay loop></dotlottie-wc>
+            <dotlottie-wc class="lottie" src="https://lottie.host/7a38af72-125a-45bf-8d64-9fff33ae1a46/8xicPjFxDT.json" speed="1" autoplay loop></dotlottie-wc>
             <div class="label">STEM Pathways and Gender Gap</div>
           </div>
 
           <div class="card-button" role="button" tabindex="0" data-card="c2" data-label="STEM Across Generations">
-            <dotlottie-wc class="lottie" src="https://lottie.host/b2bb87b5-6a84-442a-9ee0-d4b29fae5f97/qw1cYx0jll.json" speed="1" autoplay loop></dotlottie-wc>
+            <dotlottie-wc class="lottie" src="https://lottie.host/aaa296d4-a366-4b66-ad09-a65876a5c693/o2R9oQMkNI.json" speed="1" autoplay loop></dotlottie-wc>
             <div class="label">STEM Across Generations</div>
           </div>
 
@@ -627,7 +701,20 @@ card_html = """
         const OVERVIEW_HTML = `__OVERVIEW_HTML__`;
         const CSV_DATA = `__CSV_DATA__`;
         const CSV_FILENAME = `__CSV_FILENAME__`;
+
+        const OVERVIEW_GEN_HTML = `__OVERVIEW_GEN_HTML__`;
+        const CSV_GEN_DATA = `__CSV_GEN_DATA__`;
+        const CSV_GEN_FILENAME = `__CSV_GEN_FILENAME__`;
+
+        const OVERVIEW_AGE_HTML = `__OVERVIEW_AGE_HTML__`;
+        const CSV_AGE_DATA = `__CSV_AGE_DATA__`;
+        const CSV_AGE_FILENAME = `__CSV_AGE_FILENAME__`;
+
+
         const CSV_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_DATA);
+        const CSV_GEN_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_GEN_DATA);
+        const CSV_AGE_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_AGE_DATA);
+
 
         const WRAP = document.getElementById('wrap');
         const GRID = document.getElementById('cards-grid');
@@ -647,12 +734,26 @@ card_html = """
               <div class="row hero-row">
                 <div class="col s12 m5 l4 center-align">
                   <dotlottie-wc class="hero-lottie"
-                    src="https://lottie.host/51a834a6-c752-463e-9d4d-a5ce8a2868ec/GvLk1hszLK.json"
+                    src="https://lottie.host/7a38af72-125a-45bf-8d64-9fff33ae1a46/8xicPjFxDT.json"
                     autoplay loop speed="1"></dotlottie-wc>
                 </div>
                 <div class="col s12 m7 l8">
                   <blockquote class="quote-block gray-text flow-text">
                     Most STEM university graduates are absorbed into employment (79.39%), yet a striking mismatch persists as only 18.39% work in STEM-related jobs while the majority (61.00%) shift to non-STEM fields. Male graduates show higher employment rates (86.21%) and better alignment with STEM jobs (21.09%) compared to females, who face lower employment (73.56%), higher unemployment (25.62%), and weaker STEM job integration (16.09%).
+                  </blockquote>
+                </div>
+              </div>
+            </div>`,
+          c2: `<div class="container">
+              <div class="row hero-row">
+                <div class="col s12 m5 l4 center-align">
+                  <dotlottie-wc class="hero-lottie"
+                    src="https://lottie.host/aaa296d4-a366-4b66-ad09-a65876a5c693/o2R9oQMkNI.json"
+                    autoplay loop speed="1"></dotlottie-wc>
+                </div>
+                <div class="col s12 m7 l8">
+                  <blockquote class="quote-block gray-text flow-text">
+                    Indonesia’s STEM graduates show a workforce in transition, with Millennials still the largest group (52.98%), followed by Gen Z (21.79%), Gen X (19.30%), and a smaller share of Baby Boomers (5.93%). Millennials dominate across all provinces, though the share of Gen Z ranges from around 18% to 27%. 
                   </blockquote>
                 </div>
               </div>
@@ -667,6 +768,12 @@ card_html = """
               “Beyond the overall STEM talent underutilization, women experience a double disadvantage,
                 highlighting the need for stronger industry-academia linkages and gender-inclusive policies
                 to maximize STEM potential in the labor market.”
+            </div>`,
+          c2:`<div style="background-color:#f0f0f0; padding:20px; border-radius:10px;
+              box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+              font-size:18px; font-style:italic; color:#333;
+              width:80%; margin:40px auto; text-align:center;">
+              “Millennials dominate Indonesia’s STEM graduates, while Gen Z is emerging, underscoring the need to integrate new talent while drawing on older generations’ expertise.”
             </div>`
         };
 
@@ -674,7 +781,7 @@ card_html = """
           c1: [
             { t:"Percentage of STEM University Graduates by Sex, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_HTML, csv:true },
             { 
-              t:"Sankey — Distribution of STEM University Graduates by Employment Status, 2024",
+              t:"Graph — Distribution of STEM University Graduates by Employment Status, 2024",
               raw:true, nowrap:true, 
               body: `
                 <div id="sankey-panel">
@@ -701,8 +808,8 @@ card_html = """
             }
           ],
           c2: [
-            { t:"Age Cohorts", body:"Perbandingan Gen Z, Milenial, dst."},
-            { t:"Mobility", body:"Transisi pendidikan → pekerjaan lintas generasi."}
+            { t:"Percentage of STEM University Graduates by Generation, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_GEN_HTML, csvGen:true },
+            { t:"Percentage of STEM University Graduates by Age Group, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_AGE_HTML, csvAge:true }
           ],
           c3: [
             { t:"Participation", body:"Tingkat partisipasi & hambatan."},
@@ -748,25 +855,92 @@ card_html = """
 
         /* ==== Collapsible builder ==== */
         function buildCollapsible(items){
-          return items.map(it => `
-            <li>
-              <div class="collapsible-header">
-                <div class="hdr-left"><i class="material-icons">expand_more</i>${it.t}</div>
-                ${it.csv ? `
-                  <a href="${CSV_URL}" download="${CSV_FILENAME}"
-                    class="btn-flat waves-effect download-btn"
-                    title="Download CSV" onclick="event.stopPropagation();">
-                    <i class="material-icons">download</i>
-                  </a>` : ``}
-              </div>
-              <div class="collapsible-body">
-                ${it.raw
-                    ? (it.nowrap ? it.body : `<div class="table-wrap">${it.body}</div>`)
-                    : `<span>${it.body||""}</span>`}
-              </div>
-            </li>
-          `).join('');
+          return items.map(it => {
+            // Kumpulkan semua tombol yang perlu ditampilkan
+            const btns = [];
+            if (it.csv) {
+              btns.push(`
+                <a href="${CSV_URL}" download="${CSV_FILENAME}"
+                  class="btn-flat waves-effect download-btn"
+                  title="Download CSV" onclick="event.stopPropagation();">
+                  <i class="material-icons">download</i>
+                </a>`);
+            }
+            if (it.csvGen) {
+              btns.push(`
+                <a href="${CSV_GEN_URL}" download="${CSV_GEN_FILENAME}"
+                  class="btn-flat waves-effect download-btn"
+                  title="Download CSV" onclick="event.stopPropagation();">
+                  <i class="material-icons">download</i>
+                </a>`);
+            }
+            if (it.csvAge) {
+              btns.push(`
+                <a href="${CSV_AGE_URL}" download="${CSV_AGE_FILENAME}"
+                  class="btn-flat waves-effect download-btn"
+                  title="Download CSV" onclick="event.stopPropagation();">
+                  <i class="material-icons">download</i>
+                </a>`);
+            }
+            const downloads = btns.join('');
+
+            // Body
+            const bodyHtml = it.raw
+              ? (it.nowrap ? it.body : `<div class="table-wrap">${it.body}</div>`)
+              : `<span>${it.body || ""}</span>`;
+
+            return `
+              <li>
+                <div class="collapsible-header">
+                  <div class="hdr-left"><i class="material-icons">expand_more</i>${it.t}</div>
+                  ${downloads}
+                </div>
+                <div class="collapsible-body">
+                  ${bodyHtml}
+                </div>
+              </li>`;
+          }).join('');
         }
+
+
+
+        function decorateTableByHeader({
+          tableId,                 
+          headers = [],            
+          provinceCol = 0,         
+          yellow = [],            
+          red = [],                
+          yellowClass = 'rse-yellow',
+          redClass = 'rse-red',
+        }) {
+          const t = document.getElementById(tableId);
+          if (!t) return;
+
+          // Temukan index kolom yang head-nya match salah satu dari `headers`
+          const headCells = (t.tHead ? t.tHead.rows[0].cells : t.rows[0].cells);
+          const headerIdxs = Array.from(headCells).reduce((acc, th, idx) => {
+            const txt = th.textContent.trim().toLowerCase();
+            if (headers.some(h => txt.includes(h.toLowerCase()))) acc.push(idx);
+            return acc;
+          }, []);
+          if (!headerIdxs.length) return;
+
+          const yellowSet = new Set(yellow);
+          const redSet = new Set(red);
+
+          const body = t.tBodies[0] || t;
+          for (const r of body.rows) {
+            const prov = (r.cells[provinceCol]?.textContent || '').trim();
+            for (const idx of headerIdxs) {
+              const cell = r.cells[idx];
+              if (!cell) continue;
+              if (yellowSet.has(prov)) cell.classList.add(yellowClass);
+              if (redSet.has(prov))    cell.classList.add(redClass);
+            }
+          }
+        }
+
+
         let sankeyReady = false;
 
         function initMaterialize(){
@@ -783,6 +957,32 @@ card_html = """
                 } else {
                   Plotly.Plots.resize(holder);  // buka-tutup berikutnya: cukup resize
                 }
+              }
+              if (el.querySelector('#gen-table')) {
+                decorateTableByHeader({
+                  tableId: 'gen-table',
+                  headers: ['Baby Boomer', 'Pre-Boomer'],
+                  provinceCol: 0,
+                  yellow: [
+                    'Riau','Jambi','Bengkulu','Bangka-Belitung','Nusa Tenggara Barat',
+                    'Kalimantan Tengah','Kalimantan Utara','Sulawesi Tengah','Maluku Utara','Papua Barat'
+                  ],
+                  red: ['Maluku','Sulawesi Barat','Kepulauan Riau']
+                });
+              }
+
+
+                if (el.querySelector('#age-table')) {
+                decorateTableByHeader({
+                  tableId: 'age-table',
+                  headers: ['60+ yo'],
+                  provinceCol: 0,
+                  yellow: [
+                    'Riau','Jambi','Bengkulu','Bangka-Belitung','Nusa Tenggara Barat', 'Kalimantan Barat',
+                    'Kalimantan Tengah','Kalimantan Utara','Sulawesi Tengah','Maluku Utara','Papua Barat'
+                  ],
+                  red: ['Gorontalo','Sulawesi Barat','Kepulauan Riau']
+                });
               }
               requestAnimationFrame(setHeight);
             },
@@ -863,6 +1063,7 @@ card_html = """
             fadeOut(LIST); fadeOut(HERO); fadeOut(QUOTES);
             setHeight();
           });
+          sankeyReady = false;  
         }
 
 
@@ -874,7 +1075,6 @@ card_html = """
 
           CLOSE_BAR.classList.add('show');
           fadeIn(HERO); fadeIn(LIST); fadeIn(QUOTES);
-          // ❌ hapus: setupSankey();
           LIST.scrollIntoView({behavior:'smooth', block:'nearest'});
         }
 
@@ -914,6 +1114,7 @@ card_html = """
             requestAnimationFrame(() => { GRID.classList.remove('is-hidden'); setHeight(); });
             activeId = null;
             cards.forEach(c => c.classList.remove('active'));
+            sankeyReady = false;       
           });
         });
       })();
@@ -932,9 +1133,16 @@ card_html = card_html.replace("__OVERVIEW_HTML__", overview_html_js)
 card_html = card_html.replace("__CSV_DATA__", overview_csv_js)
 card_html = card_html.replace("__CSV_FILENAME__", csv_filename_sex)
 
+card_html = card_html.replace("__OVERVIEW_GEN_HTML__", overview_html_gen_js)
+card_html = card_html.replace("__CSV_GEN_DATA__", overview_csv_gen_js)
+card_html = card_html.replace("__CSV_GEN_FILENAME__", csv_filename_gen)
+
+
+card_html = card_html.replace("__OVERVIEW_AGE_HTML__", overview_html_age_js)
+card_html = card_html.replace("__CSV_AGE_DATA__", overview_csv_age_js)
+card_html = card_html.replace("__CSV_AGE_FILENAME__", csv_filename_age)
+
 components.html(card_html, height=0, scrolling=False)
-
-
 
 
 

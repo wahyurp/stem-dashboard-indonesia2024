@@ -515,208 +515,151 @@ card_html = """
     <!-- Materialize JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
-    <script>
-      (function(){
-        const OVERVIEW_HTML = `__OVERVIEW_HTML__`;
-        const CSV_DATA = `__CSV_DATA__`;
-        const CSV_FILENAME = `__CSV_FILENAME__`;
-        const CSV_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_DATA);
+<script>
+(function () {
+  const OVERVIEW_HTML = `__OVERVIEW_HTML__`;
+  const CSV_DATA = `__CSV_DATA__`;
+  const CSV_FILENAME = `__CSV_FILENAME__`;
+  const CSV_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_DATA);
 
-        const WRAP = document.getElementById('wrap');
-        const GRID = document.getElementById('cards-grid');
-        const HERO = document.getElementById('detail-hero');
-        const QUOTES = document.getElementById('detail-quotes');
-        const LIST = document.getElementById('detail-collapsible');
-        const CLOSE_BAR = document.getElementById('close-bar');
-        const CLOSE_BTN = document.getElementById('close-btn');
-        const cards = Array.from(document.querySelectorAll('.card-button'));
-        let activeId = null;
-        const singleSelect = true;
+  const WRAP = document.getElementById('wrap');
+  const GRID = document.getElementById('cards-grid');
+  const HERO = document.getElementById('detail-hero');
+  const QUOTES = document.getElementById('detail-quotes');
+  const LIST = document.getElementById('detail-collapsible');
+  const CLOSE_BAR = document.getElementById('close-bar');
+  const CLOSE_BTN = document.getElementById('close-btn');
+  const cards = Array.from(document.querySelectorAll('.card-button'));
+  let activeId = null;
+  const singleSelect = true;
 
-        const HERO_BY_CARD = {
-          c1: `
-            <div class="container">
-              <div class="row hero-row">
-                <div class="col s12 m5 l4 center-align">
-                  <dotlottie-wc class="hero-lottie"
-                    src="https://lottie.host/51a834a6-c752-463e-9d4d-a5ce8a2868ec/GvLk1hszLK.json"
-                    autoplay loop speed="1"></dotlottie-wc>
-                </div>
-                <div class="col s12 m7 l8 white-text">
-                  <blockquote class="quote-block white-text flow-text">
-                    Most STEM university graduates are absorbed into employment (79.39%), yet a striking mismatch persists as only 18.39% work in STEM-related jobs while the majority (61.00%) shift to non-STEM fields. Male graduates show higher employment rates (86.21%) and better alignment with STEM jobs (21.09%) compared to females, who face lower employment (73.56%), higher unemployment (25.62%), and weaker STEM job integration (16.09%).
-                  </blockquote>
-                </div>
-              </div>
-            </div>`
-        };
+  // ---- kirim tinggi ke Streamlit
+  function reportHeight() {
+    const h = Math.ceil(document.documentElement.scrollHeight);
+    window.parent.postMessage(
+      { isStreamlitMessage: true, type: "streamlit:setFrameHeight", height: h },
+      "*"
+    );
+  }
+  const ro = new ResizeObserver(reportHeight);
+  ro.observe(document.body);
+  if (WRAP) ro.observe(WRAP);
+  window.addEventListener("load", reportHeight);
+  document.addEventListener("DOMContentLoaded", reportHeight);
 
-        const CARD_QUOTES = {
-          c1:`<div style="background-color:#f0f0f0; padding:20px; border-radius:10px;
-              box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-              font-size:18px; font-style:italic; color:#333;
-              width:80%; margin:40px auto; text-align:center;">
-              “Beyond the overall STEM talent underutilization, women experience a double disadvantage,
-                highlighting the need for stronger industry-academia linkages and gender-inclusive policies
-                to maximize STEM potential in the labor market.”
-            </div>`
-        };
+  // ---- init Materialize Collapsible (SATU versi saja)
+  window.initMaterialize = function () {
+    const elems = document.querySelectorAll(".collapsible");
+    M.Collapsible.init(elems, {
+      accordion: false,
+      onOpenEnd: reportHeight,
+      onCloseEnd: reportHeight,
+    });
+    reportHeight();
+  };
 
-        const DATA = {
-          c1: [
-            { t:"Percentage of STEM University Graduates by Sex, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_HTML, csv:true },
-          ],
-          c2: [
-            { t:"Age Cohorts", body:"Perbandingan Gen Z, Milenial, dst."},
-            { t:"Mobility", body:"Transisi pendidikan → pekerjaan lintas generasi."}
-          ],
-          c3: [
-            { t:"Participation", body:"Tingkat partisipasi & hambatan."},
-            { t:"Support", body:"Dukungan & akomodasi yang efektif."}
-          ],
-          c4: [
-            { t:"Match Quality", body:"Kesesuaian jurusan–pekerjaan & wage premium."},
-            { t:"Regional Gaps", body:"Perbedaan antardaerah & implikasi kebijakan."}
-          ]
-        };
+  // ---- helper selesai animasi
+  window.afterAnim = () => setTimeout(reportHeight, 340);
 
-        
-        function reportHeight() {
-          // hitung tinggi halaman di dalam iframe
-          const h = Math.ceil(document.documentElement.scrollHeight);
-          // kirim ke Streamlit agar iFrame diubah dinamis
-          window.parent.postMessage(
-            { isStreamlitMessage: true, type: "streamlit:setFrameHeight", height: h },
-            "*"
-          );
-        }
-      
-        // Observer: panggil saat tinggi berubah
-        const ro = new ResizeObserver(reportHeight);
-        ro.observe(document.body);
-        if (WRAP) ro.observe(WRAP);
-      
-        window.addEventListener("load", reportHeight);
-        document.addEventListener("DOMContentLoaded", reportHeight);
-      
-        // --- di tempat Anda init Materialize:
-        window.initMaterialize = function () {
-          const elems = document.querySelectorAll(".collapsible");
-          M.Collapsible.init(elems, {
-            accordion: false,
-            onOpenEnd: reportHeight,
-            onCloseEnd: reportHeight,
-          });
-          reportHeight();
-        };
-      
-        // helper untuk animasi fade
-        window.afterAnim = () => setTimeout(reportHeight, 340);        /* ==== Fade helpers ==== */
-        function fadeOut(el, after){
-          if(!el) return after && after();
-          el.classList.add('fadeable', 'fade-hidden');
-          el.style.opacity = '';
-          setTimeout(() => { if (after) after(); setHeight(); }, 320);
-        }
-        function fadeIn(el){
-          if(!el) return;
-          el.classList.add('fadeable');
-          el.classList.remove('fade-hidden');
-          el.style.opacity = '';
-          setTimeout(setHeight, 320);
-        }
+  // ---- Fade helpers (pakai reportHeight, bukan setHeight)
+  function fadeOut(el, after){
+    if (!el) { if (after) after(); return; }
+    el.classList.add('fadeable', 'fade-hidden');
+    el.style.opacity = '';
+    setTimeout(() => { if (after) after(); reportHeight(); }, 320);
+  }
+  function fadeIn(el){
+    if (!el) return;
+    el.classList.add('fadeable');
+    el.classList.remove('fade-hidden');
+    el.style.opacity = '';
+    setTimeout(reportHeight, 320);
+  }
 
-        /* ==== Collapsible builder ==== */
-        function buildCollapsible(items){
-          return items.map(it => `
-            <li>
-              <div class="collapsible-header">
-                <div class="hdr-left"><i class="material-icons">expand_more</i>${it.t}</div>
-                ${it.csv ? `
-                  <a href="${CSV_URL}" download="${CSV_FILENAME}"
-                     class="btn-flat waves-effect download-btn"
-                     title="Download CSV" onclick="event.stopPropagation();">
-                    <i class="material-icons">download</i>
-                  </a>` : ``}
-              </div>
-              <div class="collapsible-body">
-                ${it.raw ? `<div class="table-wrap">${it.body}</div>` : `<span>${it.body||""}</span>`}
-              </div>
-            </li>
-          `).join('');
-        }
-        function initMaterialize(){
-          const elems = document.querySelectorAll('.collapsible');
-          M.Collapsible.init(elems, {
-            accordion: false,
-            onOpenEnd: () => requestAnimationFrame(setHeight),
-            onCloseEnd: () => requestAnimationFrame(setHeight)
-          });
-          setHeight();
-        }
+  // ---- builder isi collapsible
+  function buildCollapsible(items){
+    return items.map(it => `
+      <li>
+        <div class="collapsible-header">
+          <div class="hdr-left"><i class="material-icons">expand_more</i>${it.t}</div>
+          ${it.csv ? `
+            <a href="${CSV_URL}" download="${CSV_FILENAME}"
+               class="btn-flat waves-effect download-btn"
+               title="Download CSV" onclick="event.stopPropagation();">
+              <i class="material-icons">download</i>
+            </a>` : ``}
+        </div>
+        <div class="collapsible-body">
+          ${it.raw ? `<div class="table-wrap">${it.body}</div>` : `<span>${it.body||""}</span>`}
+        </div>
+      </li>
+    `).join('');
+  }
 
-        function clearActive(){
-          cards.forEach(c => c.classList.remove('active'));
-          activeId = null;
-          LIST.innerHTML = "";
-          HERO.innerHTML = "";
-          CLOSE_BAR.classList.remove('show');
-          GRID.style.display = "";
-          requestAnimationFrame(() => {
-            GRID.classList.remove('is-hidden');
-            fadeOut(LIST); fadeOut(HERO);
-            setHeight();
-          });
-        }
+  function clearActive(){
+    cards.forEach(c => c.classList.remove('active'));
+    activeId = null;
+    LIST.innerHTML = "";
+    HERO.innerHTML = "";
+    CLOSE_BAR.classList.remove('show');
+    GRID.style.display = "";
+    requestAnimationFrame(() => {
+      GRID.classList.remove('is-hidden');
+      fadeOut(LIST); fadeOut(HERO);
+      reportHeight();
+    });
+  }
 
-        function showPanel(id){
-          HERO.innerHTML = HERO_BY_CARD[id] || "";
-          LIST.innerHTML = buildCollapsible(DATA[id] || []);
-          initMaterialize();
-          QUOTES.innerHTML = CARD_QUOTES[id] || "";
+  function showPanel(id){
+    HERO.innerHTML = HERO_BY_CARD[id] || "";
+    LIST.innerHTML = buildCollapsible(DATA[id] || []);
+    window.initMaterialize();
+    QUOTES.innerHTML = CARD_QUOTES[id] || "";
 
-          CLOSE_BAR.classList.add('show');
-          fadeIn(HERO); fadeIn(LIST); fadeIn(QUOTES);
-          afterAnim();
-          LIST.scrollIntoView({behavior:'smooth', block:'nearest'});
-        }
+    CLOSE_BAR.classList.add('show');
+    fadeIn(HERO); fadeIn(LIST); fadeIn(QUOTES);
+    afterAnim();
+    LIST.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
 
-        function toggleCard(card){
-          const id = card.getAttribute('data-card');
-          if (singleSelect && activeId === id) { clearActive(); return; }
-          cards.forEach(c => c.classList.remove('active'));
-          card.classList.add('active');
-          activeId = id;
+  function toggleCard(card){
+    const id = card.getAttribute('data-card');
+    if (singleSelect && activeId === id) { clearActive(); return; }
+    cards.forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    activeId = id;
 
-          GRID.classList.add('is-hidden');
-          setTimeout(function(){
-            GRID.style.display = "none";
-            showPanel(id);
-          }, 320);
-        }
+    GRID.classList.add('is-hidden');
+    setTimeout(function(){
+      GRID.style.display = "none";
+      showPanel(id);
+    }, 320);
+  }
 
-        initMaterialize();
-        cards.forEach(card => {
-          card.addEventListener('click', () => toggleCard(card));
-          card.addEventListener('keydown', e => {
-            if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleCard(card); }
-          });
-        });
+  // init pertama (pakai window.)
+  window.initMaterialize();
+  cards.forEach(card => {
+    card.addEventListener('click', () => toggleCard(card));
+    card.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleCard(card); }
+    });
+  });
 
-        CLOSE_BTN.addEventListener('click', function(){
-          CLOSE_BAR.classList.remove('show');
-          fadeOut(LIST, function(){ LIST.innerHTML = ""; setHeight(); });
-          fadeOut(QUOTES, function(){ QUOTES.innerHTML = ""; setHeight(); });
-          fadeOut(HERO, function(){
-            HERO.innerHTML = "";
-            GRID.style.display = "";
-            requestAnimationFrame(() => { GRID.classList.remove('is-hidden'); afterAnim(); });
-            activeId = null;
-            cards.forEach(c => c.classList.remove('active'));
-          });
-        });
-      })();
-    </script>
+  CLOSE_BTN.addEventListener('click', function(){
+    CLOSE_BAR.classList.remove('show');
+    fadeOut(LIST, function(){ LIST.innerHTML = ""; reportHeight(); });
+    fadeOut(QUOTES, function(){ QUOTES.innerHTML = ""; reportHeight(); });
+    fadeOut(HERO, function(){
+      HERO.innerHTML = "";
+      GRID.style.display = "";
+      requestAnimationFrame(() => { GRID.classList.remove('is-hidden'); afterAnim(); });
+      activeId = null;
+      cards.forEach(c => c.classList.remove('active'));
+    });
+  });
+})();
+</script>
+
   </body>
 </html>
 """

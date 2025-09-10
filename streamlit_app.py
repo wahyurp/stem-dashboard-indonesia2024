@@ -327,15 +327,14 @@ components.html("""
           <!-- Highlight rounded dengan teks putih -->
           <div class="quote-card">
             <i class="material-icons left">format_quote</i>
-            <span style="display:block; font-style:italic;">
-              STEM employment data is more than numbers—it reveals how talent meets opportunity,
-              where gaps persist, and how we can unlock the full potential of future innovators.
+            <span style="font-style:italic;">
+              STEM employment data is more than numbers—it reveals how talent meets opportunity, where gaps persist, and how we can unlock the full potential of future innovators.
             </span>
           </div>
         </div>
 
         <!-- Kanan: Lottie -->
-        <div class="col s12 m6 center-align">
+        <div class="col s12 m6 center-align offset-m1 hide-on-small-only">
           <lottie-player
             src="https://lottie.host/51a834a6-c752-463e-9d4d-a5ce8a2868ec/GvLk1hszLK.json"
             background="transparent"
@@ -382,8 +381,558 @@ components.html("""
 </html>
 """, height=800, scrolling=False)
 
+# --------------------- Konten normal (centered) ---------------------
+# # === SEGMENT 1: anchor yang 'membungkus' blok Streamlit berikutnya ===
+# st.markdown('<div id="wrap-s1"></div>', unsafe_allow_html=True)
+# st.markdown("""
+# <style>
+# /* Wrapper persis SETELAH anchor (kadang ada 1-2 level pembungkus) */
+# #wrap-s1 + div,
+# #wrap-s1 + div > div,
+# #wrap-s1 + div > div > div{
+#   max-width: 1200px !important;
+#   margin-left: auto !important;
+#   margin-right: auto !important;
+#   padding-left: 2rem !important;
+#   padding-right: 2rem !important;
+# }
+# @media (max-width: 600px){
+#   #wrap-s1 + div,
+#   #wrap-s1 + div > div,
+#   #wrap-s1 + div > div > div{
+#     padding-left: 1rem !important;
+#     padding-right: 1rem !important;
+#   }
+# }
+# </style>
+# """, unsafe_allow_html=True)
+# # === SEGMENT 1 (centered via spacer columns) ===
+# left_pad, mid, right_pad = st.columns([1, 10, 1], gap="small")
+
+# H_SEX = "— 𝗦𝗲𝘅 —"
+# H_REGION = "— 𝗥𝗲𝗴𝗶𝗼𝗻 —"
+
+# grouped_options = [
+#     "All",
+#     H_SEX, "Female", "Male",
+#     H_REGION, "Sumatera", "Jawa–Bali", "Kalimantan", "Sulawesi",
+#     "Nusa Tenggara, Maluku, Papua"
+# ]
+
+# def _block_header_choice():
+#     v = st.session_state["filters_grouped"]
+#     if v in (H_SEX, H_REGION):
+#         # kembalikan ke All jika user mengklik header
+#         st.session_state["filters_grouped"] = "All"
+# with mid:
+#   st.markdown('<div class="title-text" style="text-align:center;">Distribution of STEM University Graduates by Employment Status, 2024</div>', unsafe_allow_html=True)
+#   choice = st.selectbox(
+#       "Filters",
+#       grouped_options,
+#       index=0, # default = All
+#       key="filters_grouped",
+#       on_change=_block_header_choice,
+#       help="Please choose value. Header 'Sex' dan 'Region' cannot be selected."
+#   )
+#   data_selected = dataset_map[choice]
+
+#   # Bangun fig baru
+#   fig_pipeline = make_sankey(data_selected)
+
+#   # Tampilkan chart
+#   st.plotly_chart(fig_pipeline, use_container_width=True, config={"displayModeBar": False})
+# # with mid:
+# #     col1, col2 = st.columns([3, 2], gap="large")
+# #     with col1:
+# #         st.markdown("""
+# #             <div class="title-text">STEM Pathways and Gender Gap</div>
+# #             <div class="paragraph-text">
+# #             Most STEM university graduates are absorbed into employment (79.39%), 
+# #             yet a striking mismatch persists as only 18.39% work in STEM-related jobs 
+# #             while the majority (61.00%) shift to non-STEM fields.<br><br>
+# #             Male graduates show higher employment rates (86.21%) and better alignment 
+# #             with STEM jobs (21.09%) compared to females, who face lower employment (73.56%), 
+# #             higher unemployment (25.62%), and weaker STEM job integration (16.09%).
+# #             </div>
+# #         """, unsafe_allow_html=True)
+
+# #     with col2:
+# #         choice = st.selectbox(
+# #             "Filters",
+# #             grouped_options,
+# #             index=0,                         # default = All
+# #             key="filters_grouped",
+# #             on_change=_block_header_choice,
+# #             help="Please choose value. Header 'Sex' dan 'Region' cannot be selected."
+# #         # )
+# #         fig_pipeline.update_layout(
+# #             margin=dict(l=0, r=0, t=0, b=50),
+# #             paper_bgcolor="rgba(0,0,0,0)",
+# #             plot_bgcolor="rgba(0,0,0,0)",
+# #             height=320  # opsional: sesuaikan selera
+# #         )
+# #         st.plotly_chart(fig_pipeline, use_container_width=True, config={"displayModeBar": False})
 
 
+
+
+# --------------------- Segmen FULL-BLEED (hanya bagian ini) ---------------------
+card_html = """
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <!-- Materialize CSS & Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js" type="module"></script>
+
+    <style>
+      html, body { margin:0; padding:0; }
+
+      .title-text {
+        font-size:2rem; font-weight:800; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color:#fff; text-align:center; 
+        margin-bottom: 20px;
+      }
+
+      /* GRID CARD */
+      .cards-grid.container {
+        display:grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto 36px;         /* beri jarak bawah dari hero/section berikutnya */
+        transition: opacity .3s ease, transform .3s ease;
+      }
+      .cards-grid.is-hidden {
+        opacity: 0;
+        transform: translateY(6px);
+        pointer-events: none;
+      }
+
+      .card-button {
+        display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+        width:100%;
+        min-height: 260px;           /* ✅ Tinggi minimal agar label muat */
+        border-radius:16px; background:#f0f0f0; color:inherit;
+        box-shadow:0 4px 10px rgba(0,0,0,.15);
+        cursor:pointer; transition:transform .2s, background .2s, color .2s, box-shadow .2s;
+        border:none; text-align:center; padding:16px 14px; outline:0;
+      }
+      .card-button:hover { transform:translateY(-2px); }
+      .card-button.active { background:#fde047; color:#111827; }
+
+      .lottie { width:130px; height:130px; margin:6px auto 10px; flex:0 0 auto; }
+      .label { margin-top:8px; font-size:15px; font-weight:700; line-height:1.25; }
+
+      @media (max-width: 600px){
+        .lottie{ width:100px; height:100px; }
+        .label{ font-size:14px; }
+        .card-button{ min-height: 220px; }
+      }
+
+      .detail-panel { max-width:1200px; margin: 12px auto 0; background:transparent; }
+      .fadeable { transition: opacity .3s ease, transform .3s ease; }
+      .fade-hidden { opacity: 0 !important; transform: translateY(6px); pointer-events: none; }
+
+      .collapsible.popout > li { margin: 10px 0; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; }
+      .collapsible-header {
+        background:#ffffff; font-weight:700; color:#334155;
+        display:flex; align-items:center; justify-content:space-between; gap:8px;
+      }
+      .collapsible-header .hdr-left{ display:flex; align-items:center; gap:8px; }
+      .collapsible-header i.material-icons { color:#64748b; }
+      .collapsible-body { background:#ffffff; color:#475569; font-size:.95rem; }
+      .table-wrap{ max-height: 420px; overflow:auto; }
+      .collapsible-body table { margin: 0; }
+      .collapsible-body .responsive-table { width: 100%; }
+
+      /* HERO (Materialize grid) */
+      .hero-row{ margin: 12px auto 8px; }
+      .hero-lottie{ width:100%; height:260px; }
+      @media (max-width:600px){ .hero-lottie{ height:220px; } }
+
+      .quote-block{
+        border-left: 6px solid rgba(255,255,255,.95) !important;
+        background: rgba(255,255,255,.10);
+        color: #fff;
+        padding: 16px 20px;
+        margin: 0;
+        border-radius: 10px;
+      }
+
+      /* CLOSE BAR */
+      #close-bar { display:none; margin:12px auto 0; }
+      #close-bar.show { display:block; }
+
+      .blue-text { color:#3498db !important; }
+      .gray-text { color:#6b7280 !important; }
+    </style>
+  </head>
+  <body>
+
+    <div class="after-wave">
+      <div class="wrap" id="wrap">
+
+        <!-- Grid card -->
+        <div class="title-text blue-text" id="topic-title">Topic</div>
+
+        <div class="cards-grid container" id="cards-grid">
+
+          <div class="card-button" role="button" tabindex="0" data-card="c1" data-label="STEM Pathways and Gender Gap">
+            <dotlottie-wc class="lottie" src="https://lottie.host/51a834a6-c752-463e-9d4d-a5ce8a2868ec/GvLk1hszLK.json" speed="1" autoplay loop></dotlottie-wc>
+            <div class="label">STEM Pathways and Gender Gap</div>
+          </div>
+
+          <div class="card-button" role="button" tabindex="0" data-card="c2" data-label="STEM Across Generations">
+            <dotlottie-wc class="lottie" src="https://lottie.host/b2bb87b5-6a84-442a-9ee0-d4b29fae5f97/qw1cYx0jll.json" speed="1" autoplay loop></dotlottie-wc>
+            <div class="label">STEM Across Generations</div>
+          </div>
+
+          <div class="card-button" role="button" tabindex="0" data-card="c3" data-label="Disability Representation in STEM Graduates">
+            <dotlottie-wc class="lottie" src="https://lottie.host/b2bb87b5-6a84-442a-9ee0-d4b29fae5f97/qw1cYx0jll.json" speed="1" autoplay loop></dotlottie-wc>
+            <div class="label">Disability Representation in STEM Graduates</div>
+          </div>
+
+          <div class="card-button" role="button" tabindex="0" data-card="c4" data-label="Education and Occupation">
+            <dotlottie-wc class="lottie" src="https://lottie.host/b2bb87b5-6a84-442a-9ee0-d4b29fae5f97/qw1cYx0jll.json" speed="1" autoplay loop></dotlottie-wc>
+            <div class="label">Education and Occupation</div>
+          </div>
+        </div>
+
+        <!-- HERO + PANEL DETAIL -->
+        <div id="detail-hero" class="fadeable fade-hidden"></div>
+
+        <div class="detail-panel" style="margin-top:3%">
+          <ul id="detail-collapsible" class="collapsible popout expandable fadeable fade-hidden"></ul>
+          <div id="detail-quotes" class="fadeable fade-hidden"></div>
+
+          <!-- CLOSE BAR -->
+          <div id="close-bar" class="center-align">
+            <a id="close-btn" class="btn red darken-1 waves-effect">
+              <i class="material-icons left">close</i>Close
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+
+    <script>
+      (function(){
+        const OVERVIEW_HTML = `__OVERVIEW_HTML__`;
+        const CSV_DATA = `__CSV_DATA__`;
+        const CSV_FILENAME = `__CSV_FILENAME__`;
+        const CSV_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_DATA);
+
+        const WRAP = document.getElementById('wrap');
+        const GRID = document.getElementById('cards-grid');
+        const HERO = document.getElementById('detail-hero');
+        const QUOTES = document.getElementById('detail-quotes');
+        const LIST = document.getElementById('detail-collapsible');
+        const CLOSE_BAR = document.getElementById('close-bar');
+        const CLOSE_BTN = document.getElementById('close-btn');
+        const cards = Array.from(document.querySelectorAll('.card-button'));
+        const TITLE = document.getElementById('topic-title');
+        let activeId = null;
+        const singleSelect = true;
+
+        const HERO_BY_CARD = {
+          c1: `
+            <div class="container">
+              <div class="row hero-row">
+                <div class="col s12 m5 l4 center-align">
+                  <dotlottie-wc class="hero-lottie"
+                    src="https://lottie.host/51a834a6-c752-463e-9d4d-a5ce8a2868ec/GvLk1hszLK.json"
+                    autoplay loop speed="1"></dotlottie-wc>
+                </div>
+                <div class="col s12 m7 l8">
+                  <blockquote class="quote-block gray-text flow-text">
+                    Most STEM university graduates are absorbed into employment (79.39%), yet a striking mismatch persists as only 18.39% work in STEM-related jobs while the majority (61.00%) shift to non-STEM fields. Male graduates show higher employment rates (86.21%) and better alignment with STEM jobs (21.09%) compared to females, who face lower employment (73.56%), higher unemployment (25.62%), and weaker STEM job integration (16.09%).
+                  </blockquote>
+                </div>
+              </div>
+            </div>`
+        };
+
+        const CARD_QUOTES = {
+          c1:`<div style="background-color:#f0f0f0; padding:20px; border-radius:10px;
+              box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+              font-size:18px; font-style:italic; color:#333;
+              width:80%; margin:40px auto; text-align:center;">
+              “Beyond the overall STEM talent underutilization, women experience a double disadvantage,
+                highlighting the need for stronger industry-academia linkages and gender-inclusive policies
+                to maximize STEM potential in the labor market.”
+            </div>`
+        };
+
+        const DATA = {
+          c1: [
+            { t:"Percentage of STEM University Graduates by Sex, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_HTML, csv:true },
+            { 
+              t:"Sankey — Distribution of STEM University Graduates by Employment Status, 2024",
+              raw:true, nowrap:true, 
+              body: `
+                <div id="sankey-panel">
+                  <div class="input-field" style="max-width:320px;">
+                    <select id="sankey-filter">
+                      <option value="All" selected>All</option>
+                      <optgroup label="— Sex —">
+                        <option value="Female">Female</option>
+                        <option value="Male">Male</option>
+                      </optgroup>
+                      <optgroup label="— Region —">
+                        <option value="Sumatera">Sumatera</option>
+                        <option value="Jawa–Bali">Jawa–Bali</option>
+                        <option value="Kalimantan">Kalimantan</option>
+                        <option value="Sulawesi">Sulawesi</option>
+                        <option value="Nusa Tenggara, Maluku, Papua">Nusa Tenggara, Maluku, Papua</option>
+                      </optgroup>
+                    </select>
+                    <label>Filters</label>
+                  </div>
+                  <div id="sankey-chart" style="width:100%;height:420px;"></div>
+                </div>
+              `
+            }
+          ],
+          c2: [
+            { t:"Age Cohorts", body:"Perbandingan Gen Z, Milenial, dst."},
+            { t:"Mobility", body:"Transisi pendidikan → pekerjaan lintas generasi."}
+          ],
+          c3: [
+            { t:"Participation", body:"Tingkat partisipasi & hambatan."},
+            { t:"Support", body:"Dukungan & akomodasi yang efektif."}
+          ],
+          c4: [
+            { t:"Match Quality", body:"Kesesuaian jurusan–pekerjaan & wage premium."},
+            { t:"Regional Gaps", body:"Perbedaan antardaerah & implikasi kebijakan."}
+          ]
+        };
+
+        /* ==== Auto-resize iframe (lebih kuat) ==== */
+        function setHeight(){
+          try{
+            const body = document.body;
+            const h = Math.ceil(Math.max(
+              body.scrollHeight, body.offsetHeight, body.clientHeight,
+              WRAP ? WRAP.scrollHeight : 0
+            ));
+            if (window.frameElement) window.frameElement.style.height = (h + 1) + 'px';
+          }catch(e){}
+        }
+        const ro1 = new ResizeObserver(setHeight);
+        ro1.observe(document.body);
+        if (WRAP) { const ro2 = new ResizeObserver(setHeight); ro2.observe(WRAP); }
+        window.addEventListener('load', setHeight);
+        document.addEventListener('DOMContentLoaded', setHeight);
+
+        /* ==== Fade helpers ==== */
+        function fadeOut(el, after){
+          if(!el) return after && after();
+          el.classList.add('fadeable', 'fade-hidden');
+          el.style.opacity = '';
+          setTimeout(() => { if (after) after(); setHeight(); }, 320);
+        }
+        function fadeIn(el){
+          if(!el) return;
+          el.classList.add('fadeable');
+          el.classList.remove('fade-hidden');
+          el.style.opacity = '';
+          setTimeout(setHeight, 320);
+        }
+
+        /* ==== Collapsible builder ==== */
+        function buildCollapsible(items){
+          return items.map(it => `
+            <li>
+              <div class="collapsible-header">
+                <div class="hdr-left"><i class="material-icons">expand_more</i>${it.t}</div>
+                ${it.csv ? `
+                  <a href="${CSV_URL}" download="${CSV_FILENAME}"
+                    class="btn-flat waves-effect download-btn"
+                    title="Download CSV" onclick="event.stopPropagation();">
+                    <i class="material-icons">download</i>
+                  </a>` : ``}
+              </div>
+              <div class="collapsible-body">
+                ${it.raw
+                    ? (it.nowrap ? it.body : `<div class="table-wrap">${it.body}</div>`)
+                    : `<span>${it.body||""}</span>`}
+              </div>
+            </li>
+          `).join('');
+        }
+        let sankeyReady = false;
+
+        function initMaterialize(){
+          const elems = document.querySelectorAll('.collapsible');
+          M.Collapsible.init(elems, {
+            accordion: false,
+            onOpenEnd: (el) => {
+              // jika panel yang dibuka berisi sankey, render/resize di sini
+              const holder = el.querySelector('#sankey-chart');
+              if (holder) {
+                if (!sankeyReady) {
+                  setupSankey();      // pertama kali: render saat sudah visible
+                  sankeyReady = true;
+                } else {
+                  Plotly.Plots.resize(holder);  // buka-tutup berikutnya: cukup resize
+                }
+              }
+              requestAnimationFrame(setHeight);
+            },
+            onCloseEnd: () => requestAnimationFrame(setHeight)
+          });
+          setHeight();
+        }
+
+        const SANKEY_MAP = __SANKEY_MAP__;
+
+        // ====== Utilitas konversi ke format Plotly ======
+        function sankeyToPlotly(data) {
+          // data: [["source","target",value], ...]
+          const nodes = [...new Set(data.flatMap(([s,t,_]) => [s,t]))];
+          const index = Object.fromEntries(nodes.map((n,i)=>[n,i]));
+          return {
+            nodes,
+            link: {
+              source: data.map(([s]) => index[s]),
+              target: data.map(([,t]) => index[t]),
+              value:  data.map(([, ,v]) => v)
+            }
+          };
+        }
+
+        function renderSankey(choice='All'){
+          const el = document.getElementById('sankey-chart');
+          if(!el || typeof Plotly === 'undefined') return;
+          const arr = SANKEY_MAP[choice] || SANKEY_MAP['All'];
+          const {nodes, link} = sankeyToPlotly(arr);
+          const colors = ['#8dd3c7','#8CD5AE','#bebada','#E1A0A0','#DFC78C'];
+          const linkColors = link.value.map((_, i) => colors[i % colors.length]);
+
+          const trace = {
+            type: 'sankey',
+            node: { pad:20, thickness:20, label:nodes, line:{color:'#000', width:0.5} },
+            link: { ...link, color: linkColors }
+          };
+          const layout = {
+            margin:{l:0,r:0,t:8,b:8},
+            paper_bgcolor:'rgba(0,0,0,0)',
+            plot_bgcolor:'rgba(0,0,0,0)',
+            height: 420
+          };
+          Plotly.react(el, [trace], layout, {displayModeBar:false});
+          requestAnimationFrame(setHeight);
+        }
+
+        function setupSankey(){
+          const select = document.getElementById('sankey-filter');
+          const el = document.getElementById('sankey-chart');
+          if(!select || !el) return;
+
+          M.FormSelect.init(select);
+          renderSankey(select.value || 'All');
+
+          // 🔧 ini yang bikin dropdown bekerja
+          select.addEventListener('change', (e) => {
+            e.stopPropagation();                // aman di dalam collapsible
+            renderSankey(e.target.value);
+          });
+
+          // responsif
+          const ro = new ResizeObserver(() => Plotly.Plots.resize(el));
+          ro.observe(el);
+        }
+        function clearActive(){
+          cards.forEach(c => c.classList.remove('active'));
+          activeId = null;
+          if (TITLE) TITLE.textContent = 'Topic';   // ⇦ reset judul
+          LIST.innerHTML = "";
+          HERO.innerHTML = "";
+          QUOTES.innerHTML = "";                     // pastikan quotes juga dibersihkan
+          CLOSE_BAR.classList.remove('show');
+          GRID.style.display = "";
+          requestAnimationFrame(() => {
+            GRID.classList.remove('is-hidden');
+            fadeOut(LIST); fadeOut(HERO); fadeOut(QUOTES);
+            setHeight();
+          });
+        }
+
+
+        function showPanel(id){
+          HERO.innerHTML = HERO_BY_CARD[id] || "";
+          LIST.innerHTML = buildCollapsible(DATA[id] || []);
+          initMaterialize();
+          QUOTES.innerHTML = CARD_QUOTES[id] || "";
+
+          CLOSE_BAR.classList.add('show');
+          fadeIn(HERO); fadeIn(LIST); fadeIn(QUOTES);
+          // ❌ hapus: setupSankey();
+          LIST.scrollIntoView({behavior:'smooth', block:'nearest'});
+        }
+
+
+        function toggleCard(card){
+          const id = card.getAttribute('data-card');
+          if (singleSelect && activeId === id) { clearActive(); return; }
+          cards.forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          activeId = id;
+          if (TITLE) TITLE.textContent = card.dataset.label || 'Topic';
+
+
+          GRID.classList.add('is-hidden');
+          setTimeout(function(){
+            GRID.style.display = "none";
+            showPanel(id);
+          }, 320);
+        }
+
+        initMaterialize();
+        cards.forEach(card => {
+          card.addEventListener('click', () => toggleCard(card));
+          card.addEventListener('keydown', e => {
+            if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleCard(card); }
+          });
+        });
+
+        CLOSE_BTN.addEventListener('click', function(){
+          CLOSE_BAR.classList.remove('show');
+          fadeOut(LIST, function(){ LIST.innerHTML = ""; setHeight(); });
+          fadeOut(QUOTES, function(){ QUOTES.innerHTML = ""; setHeight(); });
+          fadeOut(HERO, function(){
+            HERO.innerHTML = "";
+            GRID.style.display = "";
+            TITLE.textContent = "Topic";
+            requestAnimationFrame(() => { GRID.classList.remove('is-hidden'); setHeight(); });
+            activeId = null;
+            cards.forEach(c => c.classList.remove('active'));
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>
+"""
+
+
+
+
+
+# Segmen full-bleed: diletakkan tanpa wrapper .content-wrap
+card_html = card_html.replace("__SANKEY_MAP__", json.dumps(dataset_map, ensure_ascii=False))
+card_html = card_html.replace("__OVERVIEW_HTML__", overview_html_js)
+card_html = card_html.replace("__CSV_DATA__", overview_csv_js)
+card_html = card_html.replace("__CSV_FILENAME__", csv_filename_sex)
+
+components.html(card_html, height=0, scrolling=False)
 
 
 

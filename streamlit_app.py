@@ -445,7 +445,7 @@ card_html = """
 
       /* WAVE + BACKGROUND SAMBUNG */
       .wave-wrap { position: relative; width: 100%; overflow: hidden; }
-      .wave-wrap svg { display: block; width: 100%;}
+      .wave-wrap svg { display: block; width: 100%; height: 120px; }
       .after-wave { background: #3498db; margin-top: -3%; padding: 40px 2vw 56px; }
     </style>
   </head>
@@ -715,7 +715,7 @@ card_html = card_html.replace("__OVERVIEW_HTML__", overview_html_js)
 card_html = card_html.replace("__CSV_DATA__", overview_csv_js)
 card_html = card_html.replace("__CSV_FILENAME__", csv_filename_sex)
 
-components.html(card_html, height=1200, scrolling=False)
+components.html(card_html, height=1100, scrolling=False)
 
 # --------------------- Konten normal lagi (centered) ---------------------
 # === SEGMENT 3 (centered via spacer columns) ===

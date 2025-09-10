@@ -8,6 +8,11 @@ import streamlit.components.v1 as components
 
 # --------------------- Page & Global CSS ---------------------
 st.set_page_config(layout="wide")
+st.markdown("""
+<style>
+.stApp { background: #ffffff !important; color: #111 !important; }
+</style>
+""", unsafe_allow_html=True)
 
 st.markdown("""
 <style>

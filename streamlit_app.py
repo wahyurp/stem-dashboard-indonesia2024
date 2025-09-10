@@ -446,12 +446,12 @@ card_html = """
       /* WAVE + BACKGROUND SAMBUNG */
       .wave-wrap { position: relative; width: 100%; overflow: hidden; }
       .wave-wrap svg { display: block; width: 100%; height: 120px; }
-      .after-wave { background: #3498db; margin-top: 0; padding: 32px 2vw 48px; }
+      .after-wave { background: #3498db; margin-top: -3%; padding: 40px 2vw 56px; }
     </style>
   </head>
   <body>
     <div class="wave-wrap">
-    <svg viewBox="0 0 1000 200" preserveAspectRatio="none" style="width: 100%; height: 120px;">
+    <svg viewBox="0 0 1000 200" preserveAspectRatio="none" style="width: 100%; height: 100%;">
         <path
         d="M0,200 L0.0,100.0 C 6.3,101.2 18.8,103.7 25.0,104.9 C 31.3,106.1 43.8,108.4 50.0,109.6 C 56.3,110.6 68.8,112.6 75.0,113.6 C 81.3,114.4 93.8,116.0 100.0,116.8 C 106.3,117.3 118.8,118.5 125.0,119.0 C 131.3,119.2 143.8,119.7 150.0,119.9 C 156.3,119.9 168.8,119.8 175.0,119.7 C 181.3,119.3 193.8,118.6 200.0,118.2 C 206.3,117.5 218.8,116.3 225.0,115.6 C 231.3,114.7 243.8,112.9 250.0,112.0 C 256.3,110.9 268.8,108.7 275.0,107.6 C 281.3,106.4 293.8,104.0 300.0,102.8 C 306.3,101.5 318.8,99.0 325.0,97.8 C 331.3,96.6 343.8,94.2 350.0,93.0 C 356.3,91.9 368.8,89.7 375.0,88.6 C 381.3,87.7 393.8,85.8 400.0,84.9 C 406.3,84.2 418.8,82.8 425.0,82.1 C 431.3,81.7 443.8,80.8 450.0,80.4 C 456.3,80.3 468.8,80.1 475.0,80.0 C 481.3,80.2 493.8,80.6 500.0,80.8 C 506.3,81.3 518.8,82.3 525.0,82.8 C 531.3,83.6 543.8,85.1 550.0,85.9 C 556.3,86.9 568.8,88.8 575.0,89.8 C 581.3,91.0 593.8,93.3 600.0,94.4 C 606.3,95.6 618.8,98.1 625.0,99.3 C 631.3,100.5 643.8,103.0 650.0,104.3 C 656.3,105.5 668.8,107.8 675.0,109.0 C 681.3,110.0 693.8,112.1 700.0,113.1 C 706.3,113.9 718.8,115.7 725.0,116.5 C 731.3,117.1 743.8,118.2 750.0,118.8 C 756.3,119.1 768.8,119.6 775.0,119.9 C 781.3,119.9 793.8,119.8 800.0,119.8 C 806.3,119.5 818.8,118.8 825.0,118.5 C 831.3,117.9 843.8,116.6 850.0,116.0 C 856.3,115.1 868.8,113.4 875.0,112.5 C 881.3,111.4 893.8,109.3 900.0,108.2 C 906.3,107.0 918.8,104.7 925.0,103.5 C 931.3,102.3 943.8,99.8 950.0,98.5 C 956.3,97.3 968.8,94.8 975.0,93.6 C 981.3,92.5 993.8,90.2 1000.0,89.1 C 1006.3,88.1 1018.8,86.3 1025.0,85.3 L1000.0,200.0 L0,200.0Z"
         fill="#3498db"
@@ -515,151 +515,193 @@ card_html = """
     <!-- Materialize JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
-<script>
-(function () {
-  const OVERVIEW_HTML = `__OVERVIEW_HTML__`;
-  const CSV_DATA = `__CSV_DATA__`;
-  const CSV_FILENAME = `__CSV_FILENAME__`;
-  const CSV_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_DATA);
+    <script>
+      (function(){
+        const OVERVIEW_HTML = `__OVERVIEW_HTML__`;
+        const CSV_DATA = `__CSV_DATA__`;
+        const CSV_FILENAME = `__CSV_FILENAME__`;
+        const CSV_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_DATA);
 
-  const WRAP = document.getElementById('wrap');
-  const GRID = document.getElementById('cards-grid');
-  const HERO = document.getElementById('detail-hero');
-  const QUOTES = document.getElementById('detail-quotes');
-  const LIST = document.getElementById('detail-collapsible');
-  const CLOSE_BAR = document.getElementById('close-bar');
-  const CLOSE_BTN = document.getElementById('close-btn');
-  const cards = Array.from(document.querySelectorAll('.card-button'));
-  let activeId = null;
-  const singleSelect = true;
+        const WRAP = document.getElementById('wrap');
+        const GRID = document.getElementById('cards-grid');
+        const HERO = document.getElementById('detail-hero');
+        const QUOTES = document.getElementById('detail-quotes');
+        const LIST = document.getElementById('detail-collapsible');
+        const CLOSE_BAR = document.getElementById('close-bar');
+        const CLOSE_BTN = document.getElementById('close-btn');
+        const cards = Array.from(document.querySelectorAll('.card-button'));
+        let activeId = null;
+        const singleSelect = true;
 
-  // ---- kirim tinggi ke Streamlit
-  function reportHeight() {
-    const h = Math.ceil(document.documentElement.scrollHeight);
-    window.parent.postMessage(
-      { isStreamlitMessage: true, type: "streamlit:setFrameHeight", height: h },
-      "*"
-    );
-  }
-  const ro = new ResizeObserver(reportHeight);
-  ro.observe(document.body);
-  if (WRAP) ro.observe(WRAP);
-  window.addEventListener("load", reportHeight);
-  document.addEventListener("DOMContentLoaded", reportHeight);
+        const HERO_BY_CARD = {
+          c1: `
+            <div class="container">
+              <div class="row hero-row">
+                <div class="col s12 m5 l4 center-align">
+                  <dotlottie-wc class="hero-lottie"
+                    src="https://lottie.host/51a834a6-c752-463e-9d4d-a5ce8a2868ec/GvLk1hszLK.json"
+                    autoplay loop speed="1"></dotlottie-wc>
+                </div>
+                <div class="col s12 m7 l8 white-text">
+                  <blockquote class="quote-block white-text flow-text">
+                    Most STEM university graduates are absorbed into employment (79.39%), yet a striking mismatch persists as only 18.39% work in STEM-related jobs while the majority (61.00%) shift to non-STEM fields. Male graduates show higher employment rates (86.21%) and better alignment with STEM jobs (21.09%) compared to females, who face lower employment (73.56%), higher unemployment (25.62%), and weaker STEM job integration (16.09%).
+                  </blockquote>
+                </div>
+              </div>
+            </div>`
+        };
 
-  // ---- init Materialize Collapsible (SATU versi saja)
-  window.initMaterialize = function () {
-    const elems = document.querySelectorAll(".collapsible");
-    M.Collapsible.init(elems, {
-      accordion: false,
-      onOpenEnd: reportHeight,
-      onCloseEnd: reportHeight,
-    });
-    reportHeight();
-  };
+        const CARD_QUOTES = {
+          c1:`<div style="background-color:#f0f0f0; padding:20px; border-radius:10px;
+              box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+              font-size:18px; font-style:italic; color:#333;
+              width:80%; margin:40px auto; text-align:center;">
+              “Beyond the overall STEM talent underutilization, women experience a double disadvantage,
+                highlighting the need for stronger industry-academia linkages and gender-inclusive policies
+                to maximize STEM potential in the labor market.”
+            </div>`
+        };
 
-  // ---- helper selesai animasi
-  window.afterAnim = () => setTimeout(reportHeight, 340);
+        const DATA = {
+          c1: [
+            { t:"Percentage of STEM University Graduates by Sex, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_HTML, csv:true },
+          ],
+          c2: [
+            { t:"Age Cohorts", body:"Perbandingan Gen Z, Milenial, dst."},
+            { t:"Mobility", body:"Transisi pendidikan → pekerjaan lintas generasi."}
+          ],
+          c3: [
+            { t:"Participation", body:"Tingkat partisipasi & hambatan."},
+            { t:"Support", body:"Dukungan & akomodasi yang efektif."}
+          ],
+          c4: [
+            { t:"Match Quality", body:"Kesesuaian jurusan–pekerjaan & wage premium."},
+            { t:"Regional Gaps", body:"Perbedaan antardaerah & implikasi kebijakan."}
+          ]
+        };
 
-  // ---- Fade helpers (pakai reportHeight, bukan setHeight)
-  function fadeOut(el, after){
-    if (!el) { if (after) after(); return; }
-    el.classList.add('fadeable', 'fade-hidden');
-    el.style.opacity = '';
-    setTimeout(() => { if (after) after(); reportHeight(); }, 320);
-  }
-  function fadeIn(el){
-    if (!el) return;
-    el.classList.add('fadeable');
-    el.classList.remove('fade-hidden');
-    el.style.opacity = '';
-    setTimeout(reportHeight, 320);
-  }
+        /* ==== Auto-resize iframe (lebih kuat) ==== */
+        function setHeight(){
+          try{
+            const body = document.body;
+            const h = Math.ceil(Math.max(
+              body.scrollHeight, body.offsetHeight, body.clientHeight,
+              WRAP ? WRAP.scrollHeight : 0
+            ));
+            if (window.frameElement) window.frameElement.style.height = (h + 1) + 'px';
+          }catch(e){}
+        }
+        const ro1 = new ResizeObserver(setHeight);
+        ro1.observe(document.body);
+        if (WRAP) { const ro2 = new ResizeObserver(setHeight); ro2.observe(WRAP); }
+        window.addEventListener('load', setHeight);
+        document.addEventListener('DOMContentLoaded', setHeight);
 
-  // ---- builder isi collapsible
-  function buildCollapsible(items){
-    return items.map(it => `
-      <li>
-        <div class="collapsible-header">
-          <div class="hdr-left"><i class="material-icons">expand_more</i>${it.t}</div>
-          ${it.csv ? `
-            <a href="${CSV_URL}" download="${CSV_FILENAME}"
-               class="btn-flat waves-effect download-btn"
-               title="Download CSV" onclick="event.stopPropagation();">
-              <i class="material-icons">download</i>
-            </a>` : ``}
-        </div>
-        <div class="collapsible-body">
-          ${it.raw ? `<div class="table-wrap">${it.body}</div>` : `<span>${it.body||""}</span>`}
-        </div>
-      </li>
-    `).join('');
-  }
+        /* ==== Fade helpers ==== */
+        function fadeOut(el, after){
+          if(!el) return after && after();
+          el.classList.add('fadeable', 'fade-hidden');
+          el.style.opacity = '';
+          setTimeout(() => { if (after) after(); setHeight(); }, 320);
+        }
+        function fadeIn(el){
+          if(!el) return;
+          el.classList.add('fadeable');
+          el.classList.remove('fade-hidden');
+          el.style.opacity = '';
+          setTimeout(setHeight, 320);
+        }
 
-  function clearActive(){
-    cards.forEach(c => c.classList.remove('active'));
-    activeId = null;
-    LIST.innerHTML = "";
-    HERO.innerHTML = "";
-    CLOSE_BAR.classList.remove('show');
-    GRID.style.display = "";
-    requestAnimationFrame(() => {
-      GRID.classList.remove('is-hidden');
-      fadeOut(LIST); fadeOut(HERO);
-      reportHeight();
-    });
-  }
+        /* ==== Collapsible builder ==== */
+        function buildCollapsible(items){
+          return items.map(it => `
+            <li>
+              <div class="collapsible-header">
+                <div class="hdr-left"><i class="material-icons">expand_more</i>${it.t}</div>
+                ${it.csv ? `
+                  <a href="${CSV_URL}" download="${CSV_FILENAME}"
+                     class="btn-flat waves-effect download-btn"
+                     title="Download CSV" onclick="event.stopPropagation();">
+                    <i class="material-icons">download</i>
+                  </a>` : ``}
+              </div>
+              <div class="collapsible-body">
+                ${it.raw ? `<div class="table-wrap">${it.body}</div>` : `<span>${it.body||""}</span>`}
+              </div>
+            </li>
+          `).join('');
+        }
+        function initMaterialize(){
+          const elems = document.querySelectorAll('.collapsible');
+          M.Collapsible.init(elems, {
+            accordion: false,
+            onOpenEnd: () => requestAnimationFrame(setHeight),
+            onCloseEnd: () => requestAnimationFrame(setHeight)
+          });
+          setHeight();
+        }
 
-  function showPanel(id){
-    HERO.innerHTML = HERO_BY_CARD[id] || "";
-    LIST.innerHTML = buildCollapsible(DATA[id] || []);
-    window.initMaterialize();
-    QUOTES.innerHTML = CARD_QUOTES[id] || "";
+        function clearActive(){
+          cards.forEach(c => c.classList.remove('active'));
+          activeId = null;
+          LIST.innerHTML = "";
+          HERO.innerHTML = "";
+          CLOSE_BAR.classList.remove('show');
+          GRID.style.display = "";
+          requestAnimationFrame(() => {
+            GRID.classList.remove('is-hidden');
+            fadeOut(LIST); fadeOut(HERO);
+            setHeight();
+          });
+        }
 
-    CLOSE_BAR.classList.add('show');
-    fadeIn(HERO); fadeIn(LIST); fadeIn(QUOTES);
-    afterAnim();
-    LIST.scrollIntoView({behavior:'smooth', block:'nearest'});
-  }
+        function showPanel(id){
+          HERO.innerHTML = HERO_BY_CARD[id] || "";
+          LIST.innerHTML = buildCollapsible(DATA[id] || []);
+          initMaterialize();
+          QUOTES.innerHTML = CARD_QUOTES[id] || "";
 
-  function toggleCard(card){
-    const id = card.getAttribute('data-card');
-    if (singleSelect && activeId === id) { clearActive(); return; }
-    cards.forEach(c => c.classList.remove('active'));
-    card.classList.add('active');
-    activeId = id;
+          CLOSE_BAR.classList.add('show');
+          fadeIn(HERO); fadeIn(LIST); fadeIn(QUOTES);
+          LIST.scrollIntoView({behavior:'smooth', block:'nearest'});
+        }
 
-    GRID.classList.add('is-hidden');
-    setTimeout(function(){
-      GRID.style.display = "none";
-      showPanel(id);
-    }, 320);
-  }
+        function toggleCard(card){
+          const id = card.getAttribute('data-card');
+          if (singleSelect && activeId === id) { clearActive(); return; }
+          cards.forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          activeId = id;
 
-  // init pertama (pakai window.)
-  window.initMaterialize();
-  cards.forEach(card => {
-    card.addEventListener('click', () => toggleCard(card));
-    card.addEventListener('keydown', e => {
-      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleCard(card); }
-    });
-  });
+          GRID.classList.add('is-hidden');
+          setTimeout(function(){
+            GRID.style.display = "none";
+            showPanel(id);
+          }, 320);
+        }
 
-  CLOSE_BTN.addEventListener('click', function(){
-    CLOSE_BAR.classList.remove('show');
-    fadeOut(LIST, function(){ LIST.innerHTML = ""; reportHeight(); });
-    fadeOut(QUOTES, function(){ QUOTES.innerHTML = ""; reportHeight(); });
-    fadeOut(HERO, function(){
-      HERO.innerHTML = "";
-      GRID.style.display = "";
-      requestAnimationFrame(() => { GRID.classList.remove('is-hidden'); afterAnim(); });
-      activeId = null;
-      cards.forEach(c => c.classList.remove('active'));
-    });
-  });
-})();
-</script>
+        initMaterialize();
+        cards.forEach(card => {
+          card.addEventListener('click', () => toggleCard(card));
+          card.addEventListener('keydown', e => {
+            if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleCard(card); }
+          });
+        });
 
+        CLOSE_BTN.addEventListener('click', function(){
+          CLOSE_BAR.classList.remove('show');
+          fadeOut(LIST, function(){ LIST.innerHTML = ""; setHeight(); });
+          fadeOut(QUOTES, function(){ QUOTES.innerHTML = ""; setHeight(); });
+          fadeOut(HERO, function(){
+            HERO.innerHTML = "";
+            GRID.style.display = "";
+            requestAnimationFrame(() => { GRID.classList.remove('is-hidden'); setHeight(); });
+            activeId = null;
+            cards.forEach(c => c.classList.remove('active'));
+          });
+        });
+      })();
+    </script>
   </body>
 </html>
 """
@@ -673,7 +715,7 @@ card_html = card_html.replace("__OVERVIEW_HTML__", overview_html_js)
 card_html = card_html.replace("__CSV_DATA__", overview_csv_js)
 card_html = card_html.replace("__CSV_FILENAME__", csv_filename_sex)
 
-components.html(card_html, height=1000, scrolling=False)
+components.html(card_html, height=1100, scrolling=False)
 
 # --------------------- Konten normal lagi (centered) ---------------------
 # === SEGMENT 3 (centered via spacer columns) ===

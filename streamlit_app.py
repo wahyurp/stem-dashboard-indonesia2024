@@ -730,7 +730,7 @@ card_html = card_html.replace("__OVERVIEW_HTML__", overview_html_js)
 card_html = card_html.replace("__CSV_DATA__", overview_csv_js)
 card_html = card_html.replace("__CSV_FILENAME__", csv_filename_sex)
 
-components.html(card_html, height=300, scrolling=False)
+components.html(card_html, height=1000, scrolling=False)
 
 # --------------------- Konten normal lagi (centered) ---------------------
 # === SEGMENT 3 (centered via spacer columns) ===

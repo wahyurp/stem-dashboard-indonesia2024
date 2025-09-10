@@ -8,11 +8,7 @@ import streamlit.components.v1 as components
 
 # --------------------- Page & Global CSS ---------------------
 st.set_page_config(layout="wide")
-st.markdown("""
-<style>
-.stApp { background: #ffffff !important; color: #111 !important; }
-</style>
-""", unsafe_allow_html=True)
+
 st.markdown("""
 <style>
 :root { --content-max: 1200px; --content-pad: 2rem; }
@@ -719,7 +715,7 @@ card_html = card_html.replace("__OVERVIEW_HTML__", overview_html_js)
 card_html = card_html.replace("__CSV_DATA__", overview_csv_js)
 card_html = card_html.replace("__CSV_FILENAME__", csv_filename_sex)
 
-components.html(card_html, height=500, scrolling=False)
+components.html(card_html, height=1100, scrolling=False)
 
 # --------------------- Konten normal lagi (centered) ---------------------
 # === SEGMENT 3 (centered via spacer columns) ===

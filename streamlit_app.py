@@ -181,16 +181,17 @@ with open("indonesia-prov-clean.geojson", "r", encoding="utf-8") as f:
 
 df_edunocup = pd.read_excel("data.xlsx", sheet_name="edunocup")
 
+
+
+## Sex Overview Table
 df_sex = pd.read_excel("data.xlsx", sheet_name="sex")
 
-# --- Buat HTML table dari df_edunocup ---
 overview_html = df_sex.to_html(
     index=False,
     border=0,
     classes="striped highlight responsive-table"  # kelas2 Materialize
 )
 
-# --- Escape agar aman dimasukkan ke JS template literal ---
 overview_csv = df_sex.to_csv(index=False)
 overview_html = df_sex.head(60).to_html(index=False, border=0, classes="striped highlight responsive-table")
 def _to_js_tpl_literal(s: str) -> str:
@@ -200,6 +201,63 @@ overview_html_js = _to_js_tpl_literal(overview_html)
 
 overview_csv_js = _to_js_tpl_literal(overview_csv)
 csv_filename_sex = "Percentage of STEM University Graduates by Sex 2024.csv"
+
+
+
+## Gen Overview Table
+df_gen = pd.read_excel("data.xlsx", sheet_name="gen")
+
+legend_html = """
+<div class="rse-legend" style="margin-top:8px;font-size:.9rem;color:#6b7280">
+  <span class="chip chip-yellow"></span> 25%≤RSE&lt;50%
+  &nbsp;&nbsp;&nbsp;
+  <span class="chip chip-red"></span> RSE≥50%
+</div>
+"""
+overview_csv_gen = df_gen.to_csv(index=False)
+
+overview_html_gen = df_gen.head(60).to_html(
+    index=False,
+    border=0,
+    classes="striped highlight responsive-table",
+    table_id="gen-table"  
+)
+overview_html_gen += legend_html
+
+
+overview_html_gen_js = _to_js_tpl_literal(overview_html_gen)
+
+overview_csv_gen_js = _to_js_tpl_literal(overview_csv_gen)
+csv_filename_gen = "Percentage of STEM University Graduates by Generation 2024.csv"
+
+
+
+
+## Age Overview Table
+df_age = pd.read_excel("data.xlsx", sheet_name="age")
+
+legend_html = """
+<div class="rse-legend" style="margin-top:8px;font-size:.9rem;color:#6b7280">
+  <span class="chip chip-yellow"></span> 25%≤RSE&lt;50%
+  &nbsp;&nbsp;&nbsp;
+  <span class="chip chip-red"></span> RSE≥50%
+</div>
+"""
+overview_csv_age = df_age.to_csv(index=False)
+
+overview_html_age = df_age.head(60).to_html(
+    index=False,
+    border=0,
+    classes="striped highlight responsive-table",
+    table_id="age-table"  
+)
+overview_html_age += legend_html
+
+
+overview_html_age_js = _to_js_tpl_literal(overview_html_age)
+
+overview_csv_age_js = _to_js_tpl_literal(overview_csv_age)
+csv_filename_age = "Percentage of STEM University Graduates by Age Group 2024.csv"
 
 
 
@@ -264,97 +322,214 @@ def make_choropleth(input_df, province_col, value_col, color_theme="blue"):
     )
     return choropleth
 
+
+st.markdown("<style>.block-container{padding-top:0; padding-bottom:0}</style>", unsafe_allow_html=True)
+
+components.html("""
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Materialize CSS & Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+
+  <!-- Lottie -->
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+  <style>
+    html, body { margin:0; padding:0; background:#ffffff; }  /* halaman setelah wave putih */
+    .hero-blue { background:#2196f3; color:#fff; padding-top:5%; } /* biru cerah */
+    .hero-pad { padding: 32px 0 16px; } /* ruang atas hero */
+    .title-strong { font-weight:800; margin:0 0 50px 0; }
+    .desc {margin-bottom:5%; font-size:1.1rem; line-height:1.6; }
+    .quote-card {
+      border-radius:16px;
+      background: rgba(255,255,255,0.10);   /* semi-transparan di atas biru */
+      border: 1px solid rgba(255,255,255,0.25);
+      padding:16px 18px;
+      color:#fff;
+    }
+    .quote-card i { color:#fff; margin-right:8px; }
+
+    /* Wave separator: ditempatkan di atas latar biru, path-nya putih,
+       sehingga transisi ke section putih di bawahnya halus */
+    .wave-container {
+      width:100%;
+      height:200px;
+      overflow:hidden;
+      line-height:0;
+      background:#2196f3; /* sama dengan hero agar menyatu */
+    }
+    .wave-container svg { width:100%; height:100%; display:block; }
+  </style>
+</head>
+<body>
+
+  <!-- HERO BIRU (teks putih) -->
+  <div class="hero-blue">
+    <div class=" hero-pad">
+      <div class="row valign-wrapper">
+        <!-- Kiri: Teks -->
+        <div class="col s12 m6 offset-m1">
+          <h4 class="title-strong white-text">STEM EMPLOYMENT DATA DASHBOARD 2024</h4>
+
+          <p class="flow-text desc white-text">
+            The STEM Employment Data Dashboard presents a comprehensive view of how graduates transition from education
+            to the workforce, covering employment status, job alignment, gender, generation, and regional patterns.
+            It highlights mismatches and gaps to inform strategies for better utilization of STEM talent in Indonesia.
+          </p>
+
+          <!-- Highlight rounded dengan teks putih -->
+          <div class="quote-card">
+            <i class="material-icons left">format_quote</i>
+            <span style="font-style:italic;">
+              STEM employment data is more than numbers—it reveals how talent meets opportunity, where gaps persist, and how we can unlock the full potential of future innovators.
+            </span>
+          </div>
+        </div>
+
+        <!-- Kanan: Lottie -->
+        <div class="col s12 m6 center-align offset-m1 hide-on-small-only">
+          <lottie-player
+            src="https://lottie.host/51a834a6-c752-463e-9d4d-a5ce8a2868ec/GvLk1hszLK.json"
+            background="transparent"
+            speed="1"
+            style="width:100%;max-width:560px;height:520px"
+            loop
+            autoplay>
+          </lottie-player>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAVE: putih, transisi dari biru ke putih -->
+<div class="wave-container">
+  <svg viewBox="0 0 1000 200" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+    <path
+      d="M0,200 L0.0,100.0 C 6.3,101.7 18.8,105.2 25.0,106.9 C 31.3,108.5 43.8,111.8 50.0,113.4 C 56.3,114.8 68.8,117.7 75.0,119.1 C 81.3,120.2 93.8,122.5 100.0,123.6 C 106.3,124.3 118.8,125.8 125.0,126.6 C 131.3,126.9 143.8,127.6 150.0,127.9 C 156.3,127.8 168.8,127.7 175.0,127.6 C 181.3,127.1 193.8,126.0 200.0,125.5 C 206.3,124.6 218.8,122.7 225.0,121.8 C 231.3,120.5 243.8,118.0 250.0,116.8 C 256.3,115.3 268.8,112.2 275.0,110.7 C 281.3,109.0 293.8,105.7 300.0,104.0 C 306.3,102.3 318.8,98.8 325.0,97.0 C 331.3,95.3 343.8,91.9 350.0,90.2 C 356.3,88.7 368.8,85.5 375.0,84.0 C 381.3,82.7 393.8,80.1 400.0,78.8 C 406.3,77.8 418.8,75.9 425.0,74.9 C 431.3,74.3 443.8,73.2 450.0,72.6 C 456.3,72.4 468.8,72.2 475.0,72.0 C 481.3,72.3 493.8,72.9 500.0,73.2 C 506.3,73.9 518.8,75.2 525.0,75.9 C 531.3,77.0 543.8,79.1 550.0,80.2 C 556.3,81.6 568.8,84.4 575.0,85.8 C 581.3,87.4 593.8,90.6 600.0,92.2 C 606.3,93.9 618.8,97.4 625.0,99.1 C 631.3,100.8 643.8,104.3 650.0,106.0 C 656.3,107.7 668.8,110.9 675.0,112.6 C 681.3,114.0 693.8,117.0 700.0,118.4 C 706.3,119.6 718.8,121.8 725.0,123.0 C 731.3,123.8 743.8,125.5 750.0,126.3 C 756.3,126.7 768.8,127.4 775.0,127.8 C 781.3,127.8 793.8,127.7 800.0,127.7 C 806.3,127.2 818.8,126.3 825.0,125.8 C 831.3,125.0 843.8,123.3 850.0,122.4 C 856.3,121.2 868.8,118.7 875.0,117.5 C 881.3,116.0 893.8,113.0 900.0,111.5 C 906.3,109.8 918.8,106.6 925.0,104.9 C 931.3,103.2 943.8,99.7 950.0,97.9 C 956.3,96.2 968.8,92.8 975.0,91.1 C 981.3,89.5 993.8,86.4 1000.0,84.8 C 1006.3,83.5 1018.8,80.8 1025.0,79.4 L1000.0,200.0 L0,200.0Z"
+      fill="#ffffff"
+      >
+        <animate
+          attributeName="d"
+          dur="9.0s"
+          repeatCount="indefinite"
+          values="M0,200 L0.0,100.0 C 6.3,101.7 18.8,105.2 25.0,106.9 C 31.3,108.5 43.8,111.8 50.0,113.4 C 56.3,114.8 68.8,117.7 75.0,119.1 C 81.3,120.2 93.8,122.5 100.0,123.6 C 106.3,124.3 118.8,125.8 125.0,126.6 C 131.3,126.9 143.8,127.6 150.0,127.9 C 156.3,127.8 168.8,127.7 175.0,127.6 C 181.3,127.1 193.8,126.0 200.0,125.5 C 206.3,124.6 218.8,122.7 225.0,121.8 C 231.3,120.5 243.8,118.0 250.0,116.8 C 256.3,115.3 268.8,112.2 275.0,110.7 C 281.3,109.0 293.8,105.7 300.0,104.0 C 306.3,102.3 318.8,98.8 325.0,97.0 C 331.3,95.3 343.8,91.9 350.0,90.2 C 356.3,88.7 368.8,85.5 375.0,84.0 C 381.3,82.7 393.8,80.1 400.0,78.8 C 406.3,77.8 418.8,75.9 425.0,74.9 C 431.3,74.3 443.8,73.2 450.0,72.6 C 456.3,72.4 468.8,72.2 475.0,72.0 C 481.3,72.3 493.8,72.9 500.0,73.2 C 506.3,73.9 518.8,75.2 525.0,75.9 C 531.3,77.0 543.8,79.1 550.0,80.2 C 556.3,81.6 568.8,84.4 575.0,85.8 C 581.3,87.4 593.8,90.6 600.0,92.2 C 606.3,93.9 618.8,97.4 625.0,99.1 C 631.3,100.8 643.8,104.3 650.0,106.0 C 656.3,107.7 668.8,110.9 675.0,112.6 C 681.3,114.0 693.8,117.0 700.0,118.4 C 706.3,119.6 718.8,121.8 725.0,123.0 C 731.3,123.8 743.8,125.5 750.0,126.3 C 756.3,126.7 768.8,127.4 775.0,127.8 C 781.3,127.8 793.8,127.7 800.0,127.7 C 806.3,127.2 818.8,126.3 825.0,125.8 C 831.3,125.0 843.8,123.3 850.0,122.4 C 856.3,121.2 868.8,118.7 875.0,117.5 C 881.3,116.0 893.8,113.0 900.0,111.5 C 906.3,109.8 918.8,106.6 925.0,104.9 C 931.3,103.2 943.8,99.7 950.0,97.9 C 956.3,96.2 968.8,92.8 975.0,91.1 C 981.3,89.5 993.8,86.4 1000.0,84.8 C 1006.3,83.5 1018.8,80.8 1025.0,79.4 L1000.0,200.0 L0,200.0Z;
+       M0,200 L0.0,100.0 C 6.3,98.3 18.8,94.8 25.0,93.1 C 31.3,91.5 43.8,88.2 50.0,86.6 C 56.3,85.2 68.8,82.3 75.0,80.9 C 81.3,79.8 93.8,77.5 100.0,76.4 C 106.3,75.7 118.8,74.2 125.0,73.4 C 131.3,73.1 143.8,72.4 150.0,72.1 C 156.3,72.2 168.8,72.3 175.0,72.4 C 181.3,72.9 193.8,74.0 200.0,74.5 C 206.3,75.4 218.8,77.3 225.0,78.2 C 231.3,79.5 243.8,82.0 250.0,83.2 C 256.3,84.7 268.8,87.8 275.0,89.3 C 281.3,91.0 293.8,94.3 300.0,96.0 C 306.3,97.8 318.8,101.3 325.0,103.0 C 331.3,104.7 343.8,108.1 350.0,109.8 C 356.3,111.3 368.8,114.5 375.0,116.0 C 381.3,117.3 393.8,119.9 400.0,121.2 C 406.3,122.2 418.8,124.1 425.0,125.1 C 431.3,125.7 443.8,126.8 450.0,127.4 C 456.3,127.6 468.8,127.8 475.0,128.0 C 481.3,127.7 493.8,127.1 500.0,126.8 C 506.3,126.1 518.8,124.8 525.0,124.1 C 531.3,123.0 543.8,120.9 550.0,119.8 C 556.3,118.4 568.8,115.6 575.0,114.2 C 581.3,112.6 593.8,109.4 600.0,107.8 C 606.3,106.1 618.8,102.6 625.0,100.9 C 631.3,99.2 643.8,95.7 650.0,94.0 C 656.3,92.3 668.8,89.1 675.0,87.4 C 681.3,86.0 693.8,83.0 700.0,81.6 C 706.3,80.4 718.8,78.2 725.0,77.0 C 731.3,76.2 743.8,74.5 750.0,73.7 C 756.3,73.3 768.8,72.6 775.0,72.2 C 781.3,72.2 793.8,72.3 800.0,72.3 C 806.3,72.8 818.8,73.7 825.0,74.2 C 831.3,75.0 843.8,76.8 850.0,77.6 C 856.3,78.8 868.8,81.3 875.0,82.5 C 881.3,84.0 893.8,87.0 900.0,88.5 C 906.3,90.2 918.8,93.4 925.0,95.1 C 931.3,96.8 943.8,100.3 950.0,102.1 C 956.3,103.8 968.8,107.2 975.0,108.9 C 981.3,110.5 993.8,113.6 1000.0,115.2 C 1006.3,116.5 1018.8,119.3 1025.0,120.6 L1000.0,200.0 L0,200.0Z;
+       M0,200 L0.0,100.0 C 6.3,101.7 18.8,105.2 25.0,106.9 C 31.3,108.5 43.8,111.8 50.0,113.4 C 56.3,114.8 68.8,117.7 75.0,119.1 C 81.3,120.2 93.8,122.5 100.0,123.6 C 106.3,124.3 118.8,125.8 125.0,126.6 C 131.3,126.9 143.8,127.6 150.0,127.9 C 156.3,127.8 168.8,127.7 175.0,127.6 C 181.3,127.1 193.8,126.0 200.0,125.5 C 206.3,124.6 218.8,122.7 225.0,121.8 C 231.3,120.5 243.8,118.0 250.0,116.8 C 256.3,115.3 268.8,112.2 275.0,110.7 C 281.3,109.0 293.8,105.7 300.0,104.0 C 306.3,102.3 318.8,98.8 325.0,97.0 C 331.3,95.3 343.8,91.9 350.0,90.2 C 356.3,88.7 368.8,85.5 375.0,84.0 C 381.3,82.7 393.8,80.1 400.0,78.8 C 406.3,77.8 418.8,75.9 425.0,74.9 C 431.3,74.3 443.8,73.2 450.0,72.6 C 456.3,72.4 468.8,72.2 475.0,72.0 C 481.3,72.3 493.8,72.9 500.0,73.2 C 506.3,73.9 518.8,75.2 525.0,75.9 C 531.3,77.0 543.8,79.1 550.0,80.2 C 556.3,81.6 568.8,84.4 575.0,85.8 C 581.3,87.4 593.8,90.6 600.0,92.2 C 606.3,93.9 618.8,97.4 625.0,99.1 C 631.3,100.8 643.8,104.3 650.0,106.0 C 656.3,107.7 668.8,110.9 675.0,112.6 C 681.3,114.0 693.8,117.0 700.0,118.4 C 706.3,119.6 718.8,121.8 725.0,123.0 C 731.3,123.8 743.8,125.5 750.0,126.3 C 756.3,126.7 768.8,127.4 775.0,127.8 C 781.3,127.8 793.8,127.7 800.0,127.7 C 806.3,127.2 818.8,126.3 825.0,125.8 C 831.3,125.0 843.8,123.3 850.0,122.4 C 856.3,121.2 868.8,118.7 875.0,117.5 C 881.3,116.0 893.8,113.0 900.0,111.5 C 906.3,109.8 918.8,106.6 925.0,104.9 C 931.3,103.2 943.8,99.7 950.0,97.9 C 956.3,96.2 968.8,92.8 975.0,91.1 C 981.3,89.5 993.8,86.4 1000.0,84.8 C 1006.3,83.5 1018.8,80.8 1025.0,79.4 L1000.0,200.0 L0,200.0Z"
+        />
+      </path>
+  </svg>
+</div>
+
+  <!-- Setelah wave: putih (default body) -->
+  <div class="section white">
+    <div class="container">
+      <!-- Konten lanjutan Anda di sini -->
+      <!-- <h5 class="black-text">Section berikutnya</h5> -->
+    </div>
+  </div>
+
+  <!-- Materialize JS (opsional untuk komponen interaktif) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+</html>
+""", height=800, scrolling=False)
+
 # --------------------- Konten normal (centered) ---------------------
-# === SEGMENT 1: anchor yang 'membungkus' blok Streamlit berikutnya ===
-st.markdown('<div id="wrap-s1"></div>', unsafe_allow_html=True)
-st.markdown("""
-<style>
-/* Wrapper persis SETELAH anchor (kadang ada 1-2 level pembungkus) */
-#wrap-s1 + div,
-#wrap-s1 + div > div,
-#wrap-s1 + div > div > div{
-  max-width: 1200px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  padding-left: 2rem !important;
-  padding-right: 2rem !important;
-}
-@media (max-width: 600px){
-  #wrap-s1 + div,
-  #wrap-s1 + div > div,
-  #wrap-s1 + div > div > div{
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-  }
-}
-</style>
-""", unsafe_allow_html=True)
-# === SEGMENT 1 (centered via spacer columns) ===
-left_pad, mid, right_pad = st.columns([1, 10, 1], gap="small")
+# # === SEGMENT 1: anchor yang 'membungkus' blok Streamlit berikutnya ===
+# st.markdown('<div id="wrap-s1"></div>', unsafe_allow_html=True)
+# st.markdown("""
+# <style>
+# /* Wrapper persis SETELAH anchor (kadang ada 1-2 level pembungkus) */
+# #wrap-s1 + div,
+# #wrap-s1 + div > div,
+# #wrap-s1 + div > div > div{
+#   max-width: 1200px !important;
+#   margin-left: auto !important;
+#   margin-right: auto !important;
+#   padding-left: 2rem !important;
+#   padding-right: 2rem !important;
+# }
+# @media (max-width: 600px){
+#   #wrap-s1 + div,
+#   #wrap-s1 + div > div,
+#   #wrap-s1 + div > div > div{
+#     padding-left: 1rem !important;
+#     padding-right: 1rem !important;
+#   }
+# }
+# </style>
+# """, unsafe_allow_html=True)
+# # === SEGMENT 1 (centered via spacer columns) ===
+# left_pad, mid, right_pad = st.columns([1, 10, 1], gap="small")
 
-H_SEX = "— 𝗦𝗲𝘅 —"
-H_REGION = "— 𝗥𝗲𝗴𝗶𝗼𝗻 —"
+# H_SEX = "— 𝗦𝗲𝘅 —"
+# H_REGION = "— 𝗥𝗲𝗴𝗶𝗼𝗻 —"
 
-grouped_options = [
-    "All",
-    H_SEX, "Female", "Male",
-    H_REGION, "Sumatera", "Jawa–Bali", "Kalimantan", "Sulawesi",
-    "Nusa Tenggara, Maluku, Papua"
-]
+# grouped_options = [
+#     "All",
+#     H_SEX, "Female", "Male",
+#     H_REGION, "Sumatera", "Jawa–Bali", "Kalimantan", "Sulawesi",
+#     "Nusa Tenggara, Maluku, Papua"
+# ]
 
-def _block_header_choice():
-    v = st.session_state["filters_grouped"]
-    if v in (H_SEX, H_REGION):
-        # kembalikan ke All jika user mengklik header
-        st.session_state["filters_grouped"] = "All"
-with mid:
-  st.markdown('<div class="title-text" style="text-align:center;">Distribution of STEM University Graduates by Employment Status, 2024</div>', unsafe_allow_html=True)
-  choice = st.selectbox(
-      "Filters",
-      grouped_options,
-      index=0, # default = All
-      key="filters_grouped",
-      on_change=_block_header_choice,
-      help="Please choose value. Header 'Sex' dan 'Region' cannot be selected."
-  )
-  data_selected = dataset_map[choice]
-
-  # Bangun fig baru
-  fig_pipeline = make_sankey(data_selected)
-
-  # Tampilkan chart
-  st.plotly_chart(fig_pipeline, use_container_width=True, config={"displayModeBar": False})
+# def _block_header_choice():
+#     v = st.session_state["filters_grouped"]
+#     if v in (H_SEX, H_REGION):
+#         # kembalikan ke All jika user mengklik header
+#         st.session_state["filters_grouped"] = "All"
 # with mid:
-#     col1, col2 = st.columns([3, 2], gap="large")
-#     with col1:
-#         st.markdown("""
-#             <div class="title-text">STEM Pathways and Gender Gap</div>
-#             <div class="paragraph-text">
-#             Most STEM university graduates are absorbed into employment (79.39%), 
-#             yet a striking mismatch persists as only 18.39% work in STEM-related jobs 
-#             while the majority (61.00%) shift to non-STEM fields.<br><br>
-#             Male graduates show higher employment rates (86.21%) and better alignment 
-#             with STEM jobs (21.09%) compared to females, who face lower employment (73.56%), 
-#             higher unemployment (25.62%), and weaker STEM job integration (16.09%).
-#             </div>
-#         """, unsafe_allow_html=True)
+#   st.markdown('<div class="title-text" style="text-align:center;">Distribution of STEM University Graduates by Employment Status, 2024</div>', unsafe_allow_html=True)
+#   choice = st.selectbox(
+#       "Filters",
+#       grouped_options,
+#       index=0, # default = All
+#       key="filters_grouped",
+#       on_change=_block_header_choice,
+#       help="Please choose value. Header 'Sex' dan 'Region' cannot be selected."
+#   )
+#   data_selected = dataset_map[choice]
 
-#     with col2:
-#         choice = st.selectbox(
-#             "Filters",
-#             grouped_options,
-#             index=0,                         # default = All
-#             key="filters_grouped",
-#             on_change=_block_header_choice,
-#             help="Please choose value. Header 'Sex' dan 'Region' cannot be selected."
-#         # )
-#         fig_pipeline.update_layout(
-#             margin=dict(l=0, r=0, t=0, b=50),
-#             paper_bgcolor="rgba(0,0,0,0)",
-#             plot_bgcolor="rgba(0,0,0,0)",
-#             height=320  # opsional: sesuaikan selera
-#         )
-#         st.plotly_chart(fig_pipeline, use_container_width=True, config={"displayModeBar": False})
+#   # Bangun fig baru
+#   fig_pipeline = make_sankey(data_selected)
+
+#   # Tampilkan chart
+#   st.plotly_chart(fig_pipeline, use_container_width=True, config={"displayModeBar": False})
+# # with mid:
+# #     col1, col2 = st.columns([3, 2], gap="large")
+# #     with col1:
+# #         st.markdown("""
+# #             <div class="title-text">STEM Pathways and Gender Gap</div>
+# #             <div class="paragraph-text">
+# #             Most STEM university graduates are absorbed into employment (79.39%), 
+# #             yet a striking mismatch persists as only 18.39% work in STEM-related jobs 
+# #             while the majority (61.00%) shift to non-STEM fields.<br><br>
+# #             Male graduates show higher employment rates (86.21%) and better alignment 
+# #             with STEM jobs (21.09%) compared to females, who face lower employment (73.56%), 
+# #             higher unemployment (25.62%), and weaker STEM job integration (16.09%).
+# #             </div>
+# #         """, unsafe_allow_html=True)
+
+# #     with col2:
+# #         choice = st.selectbox(
+# #             "Filters",
+# #             grouped_options,
+# #             index=0,                         # default = All
+# #             key="filters_grouped",
+# #             on_change=_block_header_choice,
+# #             help="Please choose value. Header 'Sex' dan 'Region' cannot be selected."
+# #         # )
+# #         fig_pipeline.update_layout(
+# #             margin=dict(l=0, r=0, t=0, b=50),
+# #             paper_bgcolor="rgba(0,0,0,0)",
+# #             plot_bgcolor="rgba(0,0,0,0)",
+# #             height=320  # opsional: sesuaikan selera
+# #         )
+# #         st.plotly_chart(fig_pipeline, use_container_width=True, config={"displayModeBar": False})
 
 
 
@@ -397,7 +572,7 @@ card_html = """
       .card-button {
         display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
         width:100%;
-        min-height: 260px;           /* ✅ Tinggi minimal agar label muat */
+        min-height: 260px;          
         border-radius:16px; background:#f0f0f0; color:inherit;
         box-shadow:0 4px 10px rgba(0,0,0,.15);
         cursor:pointer; transition:transform .2s, background .2s, color .2s, box-shadow .2s;
@@ -449,44 +624,43 @@ card_html = """
       #close-bar { display:none; margin:12px auto 0; }
       #close-bar.show { display:block; }
 
-      /* WAVE + BACKGROUND SAMBUNG */
-      .wave-wrap { position: relative; width: 100%; overflow: hidden; }
-      .wave-wrap svg { display: block; width: 100%; height: 120px; }
-      .after-wave { background: #3498db; margin-top: -3%; padding: 40px 2vw 56px; }
+      .blue-text { color:#3498db !important; }
+      .gray-text { color:#6b7280 !important; }
+      /* highlight sel */
+      .rse-yellow{ background:#fff3bf !important; }  /* kuning lembut */
+      .rse-red{    background:#ffc9c9 !important; }  /* merah lembut */
+
+      /* legend kecil di bawah tabel */
+      .rse-legend .chip{
+        display:inline-block; width:12px; height:12px;
+        border-radius:2px; vertical-align:middle; margin:0 6px 0 0;
+        border:1px solid rgba(0,0,0,.15);
+      }
+      .rse-legend .chip-yellow{ background:#fff3bf; border-color:#f2c94c; }
+      .rse-legend .chip-red{    background:#ffc9c9; border-color:#ef4444; }
+      .collapsible-body table.responsive-table tbody tr:last-child td,
+      .collapsible-body table.responsive-table tbody tr:last-child th{
+        font-weight: 700 !important;
+      }
     </style>
   </head>
   <body>
-    <div class="wave-wrap">
-    <svg viewBox="0 0 1000 200" preserveAspectRatio="none" style="width: 100%; height: 100%;">
-        <path
-        d="M0,200 L0.0,100.0 C 6.3,101.2 18.8,103.7 25.0,104.9 C 31.3,106.1 43.8,108.4 50.0,109.6 C 56.3,110.6 68.8,112.6 75.0,113.6 C 81.3,114.4 93.8,116.0 100.0,116.8 C 106.3,117.3 118.8,118.5 125.0,119.0 C 131.3,119.2 143.8,119.7 150.0,119.9 C 156.3,119.9 168.8,119.8 175.0,119.7 C 181.3,119.3 193.8,118.6 200.0,118.2 C 206.3,117.5 218.8,116.3 225.0,115.6 C 231.3,114.7 243.8,112.9 250.0,112.0 C 256.3,110.9 268.8,108.7 275.0,107.6 C 281.3,106.4 293.8,104.0 300.0,102.8 C 306.3,101.5 318.8,99.0 325.0,97.8 C 331.3,96.6 343.8,94.2 350.0,93.0 C 356.3,91.9 368.8,89.7 375.0,88.6 C 381.3,87.7 393.8,85.8 400.0,84.9 C 406.3,84.2 418.8,82.8 425.0,82.1 C 431.3,81.7 443.8,80.8 450.0,80.4 C 456.3,80.3 468.8,80.1 475.0,80.0 C 481.3,80.2 493.8,80.6 500.0,80.8 C 506.3,81.3 518.8,82.3 525.0,82.8 C 531.3,83.6 543.8,85.1 550.0,85.9 C 556.3,86.9 568.8,88.8 575.0,89.8 C 581.3,91.0 593.8,93.3 600.0,94.4 C 606.3,95.6 618.8,98.1 625.0,99.3 C 631.3,100.5 643.8,103.0 650.0,104.3 C 656.3,105.5 668.8,107.8 675.0,109.0 C 681.3,110.0 693.8,112.1 700.0,113.1 C 706.3,113.9 718.8,115.7 725.0,116.5 C 731.3,117.1 743.8,118.2 750.0,118.8 C 756.3,119.1 768.8,119.6 775.0,119.9 C 781.3,119.9 793.8,119.8 800.0,119.8 C 806.3,119.5 818.8,118.8 825.0,118.5 C 831.3,117.9 843.8,116.6 850.0,116.0 C 856.3,115.1 868.8,113.4 875.0,112.5 C 881.3,111.4 893.8,109.3 900.0,108.2 C 906.3,107.0 918.8,104.7 925.0,103.5 C 931.3,102.3 943.8,99.8 950.0,98.5 C 956.3,97.3 968.8,94.8 975.0,93.6 C 981.3,92.5 993.8,90.2 1000.0,89.1 C 1006.3,88.1 1018.8,86.3 1025.0,85.3 L1000.0,200.0 L0,200.0Z"
-        fill="#3498db"
-        >
-            <animate
-            attributeName="d"
-            dur="9.0s"
-            repeatCount="indefinite"
-            values="M0,200 L0.0,100.0 C 6.3,101.2 18.8,103.7 25.0,104.9 C 31.3,106.1 43.8,108.4 50.0,109.6 C 56.3,110.6 68.8,112.6 75.0,113.6 C 81.3,114.4 93.8,116.0 100.0,116.8 C 106.3,117.3 118.8,118.5 125.0,119.0 C 131.3,119.2 143.8,119.7 150.0,119.9 C 156.3,119.9 168.8,119.8 175.0,119.7 C 181.3,119.3 193.8,118.6 200.0,118.2 C 206.3,117.5 218.8,116.3 225.0,115.6 C 231.3,114.7 243.8,112.9 250.0,112.0 C 256.3,110.9 268.8,108.7 275.0,107.6 C 281.3,106.4 293.8,104.0 300.0,102.8 C 306.3,101.5 318.8,99.0 325.0,97.8 C 331.3,96.6 343.8,94.2 350.0,93.0 C 356.3,91.9 368.8,89.7 375.0,88.6 C 381.3,87.7 393.8,85.8 400.0,84.9 C 406.3,84.2 418.8,82.8 425.0,82.1 C 431.3,81.7 443.8,80.8 450.0,80.4 C 456.3,80.3 468.8,80.1 475.0,80.0 C 481.3,80.2 493.8,80.6 500.0,80.8 C 506.3,81.3 518.8,82.3 525.0,82.8 C 531.3,83.6 543.8,85.1 550.0,85.9 C 556.3,86.9 568.8,88.8 575.0,89.8 C 581.3,91.0 593.8,93.3 600.0,94.4 C 606.3,95.6 618.8,98.1 625.0,99.3 C 631.3,100.5 643.8,103.0 650.0,104.3 C 656.3,105.5 668.8,107.8 675.0,109.0 C 681.3,110.0 693.8,112.1 700.0,113.1 C 706.3,113.9 718.8,115.7 725.0,116.5 C 731.3,117.1 743.8,118.2 750.0,118.8 C 756.3,119.1 768.8,119.6 775.0,119.9 C 781.3,119.9 793.8,119.8 800.0,119.8 C 806.3,119.5 818.8,118.8 825.0,118.5 C 831.3,117.9 843.8,116.6 850.0,116.0 C 856.3,115.1 868.8,113.4 875.0,112.5 C 881.3,111.4 893.8,109.3 900.0,108.2 C 906.3,107.0 918.8,104.7 925.0,103.5 C 931.3,102.3 943.8,99.8 950.0,98.5 C 956.3,97.3 968.8,94.8 975.0,93.6 C 981.3,92.5 993.8,90.2 1000.0,89.1 C 1006.3,88.1 1018.8,86.3 1025.0,85.3 L1000.0,200.0 L0,200.0Z;
-        M0,200 L0.0,100.0 C 6.3,98.8 18.8,96.3 25.0,95.1 C 31.3,93.9 43.8,91.6 50.0,90.4 C 56.3,89.4 68.8,87.4 75.0,86.4 C 81.3,85.6 93.8,84.0 100.0,83.2 C 106.3,82.7 118.8,81.5 125.0,81.0 C 131.3,80.8 143.8,80.3 150.0,80.1 C 156.3,80.1 168.8,80.3 175.0,80.3 C 181.3,80.7 193.8,81.4 200.0,81.8 C 206.3,82.5 218.8,83.8 225.0,84.4 C 231.3,85.3 243.8,87.1 250.0,88.0 C 256.3,89.1 268.8,91.3 275.0,92.4 C 281.3,93.6 293.8,96.0 300.0,97.2 C 306.3,98.5 318.8,101.0 325.0,102.2 C 331.3,103.4 343.8,105.8 350.0,107.0 C 356.3,108.1 368.8,110.3 375.0,111.4 C 381.3,112.3 393.8,114.2 400.0,115.1 C 406.3,115.8 418.8,117.2 425.0,117.9 C 431.3,118.3 443.8,119.2 450.0,119.6 C 456.3,119.7 468.8,119.9 475.0,120.0 C 481.3,119.8 493.8,119.4 500.0,119.2 C 506.3,118.7 518.8,117.7 525.0,117.2 C 531.3,116.4 543.8,114.9 550.0,114.1 C 556.3,113.1 568.8,111.2 575.0,110.2 C 581.3,109.0 593.8,106.8 600.0,105.6 C 606.3,104.4 618.8,101.9 625.0,100.7 C 631.3,99.5 643.8,97.0 650.0,95.7 C 656.3,94.5 668.8,92.2 675.0,91.0 C 681.3,90.0 693.8,87.9 700.0,86.9 C 706.3,86.1 718.8,84.3 725.0,83.5 C 731.3,82.9 743.8,81.8 750.0,81.2 C 756.3,80.9 768.8,80.4 775.0,80.1 C 781.3,80.1 793.8,80.2 800.0,80.2 C 806.3,80.5 818.8,81.2 825.0,81.5 C 831.3,82.1 843.8,83.4 850.0,84.0 C 856.3,84.9 868.8,86.6 875.0,87.5 C 881.3,88.6 893.8,90.7 900.0,91.8 C 906.3,93.0 918.8,95.3 925.0,96.5 C 931.3,97.8 943.8,100.3 950.0,101.5 C 956.3,102.7 968.8,105.2 975.0,106.4 C 981.3,107.5 993.8,109.8 1000.0,110.9 C 1006.3,111.9 1018.8,113.8 1025.0,114.7 L1000.0,200.0 L0,200.0Z;
-        M0,200 L0.0,100.0 C 6.3,101.2 18.8,103.7 25.0,104.9 C 31.3,106.1 43.8,108.4 50.0,109.6 C 56.3,110.6 68.8,112.6 75.0,113.6 C 81.3,114.4 93.8,116.0 100.0,116.8 C 106.3,117.3 118.8,118.5 125.0,119.0 C 131.3,119.2 143.8,119.7 150.0,119.9 C 156.3,119.9 168.8,119.8 175.0,119.7 C 181.3,119.3 193.8,118.6 200.0,118.2 C 206.3,117.5 218.8,116.3 225.0,115.6 C 231.3,114.7 243.8,112.9 250.0,112.0 C 256.3,110.9 268.8,108.7 275.0,107.6 C 281.3,106.4 293.8,104.0 300.0,102.8 C 306.3,101.5 318.8,99.0 325.0,97.8 C 331.3,96.6 343.8,94.2 350.0,93.0 C 356.3,91.9 368.8,89.7 375.0,88.6 C 381.3,87.7 393.8,85.8 400.0,84.9 C 406.3,84.2 418.8,82.8 425.0,82.1 C 431.3,81.7 443.8,80.8 450.0,80.4 C 456.3,80.3 468.8,80.1 475.0,80.0 C 481.3,80.2 493.8,80.6 500.0,80.8 C 506.3,81.3 518.8,82.3 525.0,82.8 C 531.3,83.6 543.8,85.1 550.0,85.9 C 556.3,86.9 568.8,88.8 575.0,89.8 C 581.3,91.0 593.8,93.3 600.0,94.4 C 606.3,95.6 618.8,98.1 625.0,99.3 C 631.3,100.5 643.8,103.0 650.0,104.3 C 656.3,105.5 668.8,107.8 675.0,109.0 C 681.3,110.0 693.8,112.1 700.0,113.1 C 706.3,113.9 718.8,115.7 725.0,116.5 C 731.3,117.1 743.8,118.2 750.0,118.8 C 756.3,119.1 768.8,119.6 775.0,119.9 C 781.3,119.9 793.8,119.8 800.0,119.8 C 806.3,119.5 818.8,118.8 825.0,118.5 C 831.3,117.9 843.8,116.6 850.0,116.0 C 856.3,115.1 868.8,113.4 875.0,112.5 C 881.3,111.4 893.8,109.3 900.0,108.2 C 906.3,107.0 918.8,104.7 925.0,103.5 C 931.3,102.3 943.8,99.8 950.0,98.5 C 956.3,97.3 968.8,94.8 975.0,93.6 C 981.3,92.5 993.8,90.2 1000.0,89.1 C 1006.3,88.1 1018.8,86.3 1025.0,85.3 L1000.0,200.0 L0,200.0Z"
-            />
-        </path>
-    </svg>
-    </div>
 
     <div class="after-wave">
       <div class="wrap" id="wrap">
-        <div class="title-text">Topic</div>
 
         <!-- Grid card -->
+        <div class="title-text blue-text" id="topic-title">Topic</div>
+
         <div class="cards-grid container" id="cards-grid">
+
           <div class="card-button" role="button" tabindex="0" data-card="c1" data-label="STEM Pathways and Gender Gap">
-            <dotlottie-wc class="lottie" src="https://lottie.host/51a834a6-c752-463e-9d4d-a5ce8a2868ec/GvLk1hszLK.json" speed="1" autoplay loop></dotlottie-wc>
+            <dotlottie-wc class="lottie" src="https://lottie.host/7a38af72-125a-45bf-8d64-9fff33ae1a46/8xicPjFxDT.json" speed="1" autoplay loop></dotlottie-wc>
             <div class="label">STEM Pathways and Gender Gap</div>
           </div>
 
           <div class="card-button" role="button" tabindex="0" data-card="c2" data-label="STEM Across Generations">
-            <dotlottie-wc class="lottie" src="https://lottie.host/b2bb87b5-6a84-442a-9ee0-d4b29fae5f97/qw1cYx0jll.json" speed="1" autoplay loop></dotlottie-wc>
+            <dotlottie-wc class="lottie" src="https://lottie.host/aaa296d4-a366-4b66-ad09-a65876a5c693/o2R9oQMkNI.json" speed="1" autoplay loop></dotlottie-wc>
             <div class="label">STEM Across Generations</div>
           </div>
 
@@ -520,13 +694,27 @@ card_html = """
 
     <!-- Materialize JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
 
     <script>
       (function(){
         const OVERVIEW_HTML = `__OVERVIEW_HTML__`;
         const CSV_DATA = `__CSV_DATA__`;
         const CSV_FILENAME = `__CSV_FILENAME__`;
+
+        const OVERVIEW_GEN_HTML = `__OVERVIEW_GEN_HTML__`;
+        const CSV_GEN_DATA = `__CSV_GEN_DATA__`;
+        const CSV_GEN_FILENAME = `__CSV_GEN_FILENAME__`;
+
+        const OVERVIEW_AGE_HTML = `__OVERVIEW_AGE_HTML__`;
+        const CSV_AGE_DATA = `__CSV_AGE_DATA__`;
+        const CSV_AGE_FILENAME = `__CSV_AGE_FILENAME__`;
+
+
         const CSV_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_DATA);
+        const CSV_GEN_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_GEN_DATA);
+        const CSV_AGE_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_AGE_DATA);
+
 
         const WRAP = document.getElementById('wrap');
         const GRID = document.getElementById('cards-grid');
@@ -536,6 +724,7 @@ card_html = """
         const CLOSE_BAR = document.getElementById('close-bar');
         const CLOSE_BTN = document.getElementById('close-btn');
         const cards = Array.from(document.querySelectorAll('.card-button'));
+        const TITLE = document.getElementById('topic-title');
         let activeId = null;
         const singleSelect = true;
 
@@ -545,12 +734,26 @@ card_html = """
               <div class="row hero-row">
                 <div class="col s12 m5 l4 center-align">
                   <dotlottie-wc class="hero-lottie"
-                    src="https://lottie.host/51a834a6-c752-463e-9d4d-a5ce8a2868ec/GvLk1hszLK.json"
+                    src="https://lottie.host/7a38af72-125a-45bf-8d64-9fff33ae1a46/8xicPjFxDT.json"
                     autoplay loop speed="1"></dotlottie-wc>
                 </div>
-                <div class="col s12 m7 l8 white-text">
-                  <blockquote class="quote-block white-text flow-text">
+                <div class="col s12 m7 l8">
+                  <blockquote class="quote-block gray-text flow-text">
                     Most STEM university graduates are absorbed into employment (79.39%), yet a striking mismatch persists as only 18.39% work in STEM-related jobs while the majority (61.00%) shift to non-STEM fields. Male graduates show higher employment rates (86.21%) and better alignment with STEM jobs (21.09%) compared to females, who face lower employment (73.56%), higher unemployment (25.62%), and weaker STEM job integration (16.09%).
+                  </blockquote>
+                </div>
+              </div>
+            </div>`,
+          c2: `<div class="container">
+              <div class="row hero-row">
+                <div class="col s12 m5 l4 center-align">
+                  <dotlottie-wc class="hero-lottie"
+                    src="https://lottie.host/aaa296d4-a366-4b66-ad09-a65876a5c693/o2R9oQMkNI.json"
+                    autoplay loop speed="1"></dotlottie-wc>
+                </div>
+                <div class="col s12 m7 l8">
+                  <blockquote class="quote-block gray-text flow-text">
+                    Indonesia’s STEM graduates show a workforce in transition, with Millennials still the largest group (52.98%), followed by Gen Z (21.79%), Gen X (19.30%), and a smaller share of Baby Boomers (5.93%). Millennials dominate across all provinces, though the share of Gen Z ranges from around 18% to 27%. 
                   </blockquote>
                 </div>
               </div>
@@ -565,16 +768,48 @@ card_html = """
               “Beyond the overall STEM talent underutilization, women experience a double disadvantage,
                 highlighting the need for stronger industry-academia linkages and gender-inclusive policies
                 to maximize STEM potential in the labor market.”
+            </div>`,
+          c2:`<div style="background-color:#f0f0f0; padding:20px; border-radius:10px;
+              box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+              font-size:18px; font-style:italic; color:#333;
+              width:80%; margin:40px auto; text-align:center;">
+              “Millennials dominate Indonesia’s STEM graduates, while Gen Z is emerging, underscoring the need to integrate new talent while drawing on older generations’ expertise.”
             </div>`
         };
 
         const DATA = {
           c1: [
             { t:"Percentage of STEM University Graduates by Sex, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_HTML, csv:true },
+            { 
+              t:"Graph — Distribution of STEM University Graduates by Employment Status, 2024",
+              raw:true, nowrap:true, 
+              body: `
+                <div id="sankey-panel">
+                  <div class="input-field" style="max-width:320px;">
+                    <select id="sankey-filter">
+                      <option value="All" selected>All</option>
+                      <optgroup label="— Sex —">
+                        <option value="Female">Female</option>
+                        <option value="Male">Male</option>
+                      </optgroup>
+                      <optgroup label="— Region —">
+                        <option value="Sumatera">Sumatera</option>
+                        <option value="Jawa–Bali">Jawa–Bali</option>
+                        <option value="Kalimantan">Kalimantan</option>
+                        <option value="Sulawesi">Sulawesi</option>
+                        <option value="Nusa Tenggara, Maluku, Papua">Nusa Tenggara, Maluku, Papua</option>
+                      </optgroup>
+                    </select>
+                    <label>Filters</label>
+                  </div>
+                  <div id="sankey-chart" style="width:100%;height:420px;"></div>
+                </div>
+              `
+            }
           ],
           c2: [
-            { t:"Age Cohorts", body:"Perbandingan Gen Z, Milenial, dst."},
-            { t:"Mobility", body:"Transisi pendidikan → pekerjaan lintas generasi."}
+            { t:"Percentage of STEM University Graduates by Generation, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_GEN_HTML, csvGen:true },
+            { t:"Percentage of STEM University Graduates by Age Group, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_AGE_HTML, csvAge:true }
           ],
           c3: [
             { t:"Participation", body:"Tingkat partisipasi & hambatan."},
@@ -620,46 +855,217 @@ card_html = """
 
         /* ==== Collapsible builder ==== */
         function buildCollapsible(items){
-          return items.map(it => `
-            <li>
-              <div class="collapsible-header">
-                <div class="hdr-left"><i class="material-icons">expand_more</i>${it.t}</div>
-                ${it.csv ? `
-                  <a href="${CSV_URL}" download="${CSV_FILENAME}"
-                     class="btn-flat waves-effect download-btn"
-                     title="Download CSV" onclick="event.stopPropagation();">
-                    <i class="material-icons">download</i>
-                  </a>` : ``}
-              </div>
-              <div class="collapsible-body">
-                ${it.raw ? `<div class="table-wrap">${it.body}</div>` : `<span>${it.body||""}</span>`}
-              </div>
-            </li>
-          `).join('');
+          return items.map(it => {
+            // Kumpulkan semua tombol yang perlu ditampilkan
+            const btns = [];
+            if (it.csv) {
+              btns.push(`
+                <a href="${CSV_URL}" download="${CSV_FILENAME}"
+                  class="btn-flat waves-effect download-btn"
+                  title="Download CSV" onclick="event.stopPropagation();">
+                  <i class="material-icons">download</i>
+                </a>`);
+            }
+            if (it.csvGen) {
+              btns.push(`
+                <a href="${CSV_GEN_URL}" download="${CSV_GEN_FILENAME}"
+                  class="btn-flat waves-effect download-btn"
+                  title="Download CSV" onclick="event.stopPropagation();">
+                  <i class="material-icons">download</i>
+                </a>`);
+            }
+            if (it.csvAge) {
+              btns.push(`
+                <a href="${CSV_AGE_URL}" download="${CSV_AGE_FILENAME}"
+                  class="btn-flat waves-effect download-btn"
+                  title="Download CSV" onclick="event.stopPropagation();">
+                  <i class="material-icons">download</i>
+                </a>`);
+            }
+            const downloads = btns.join('');
+
+            // Body
+            const bodyHtml = it.raw
+              ? (it.nowrap ? it.body : `<div class="table-wrap">${it.body}</div>`)
+              : `<span>${it.body || ""}</span>`;
+
+            return `
+              <li>
+                <div class="collapsible-header">
+                  <div class="hdr-left"><i class="material-icons">expand_more</i>${it.t}</div>
+                  ${downloads}
+                </div>
+                <div class="collapsible-body">
+                  ${bodyHtml}
+                </div>
+              </li>`;
+          }).join('');
         }
+
+
+
+        function decorateTableByHeader({
+          tableId,                 
+          headers = [],            
+          provinceCol = 0,         
+          yellow = [],            
+          red = [],                
+          yellowClass = 'rse-yellow',
+          redClass = 'rse-red',
+        }) {
+          const t = document.getElementById(tableId);
+          if (!t) return;
+
+          // Temukan index kolom yang head-nya match salah satu dari `headers`
+          const headCells = (t.tHead ? t.tHead.rows[0].cells : t.rows[0].cells);
+          const headerIdxs = Array.from(headCells).reduce((acc, th, idx) => {
+            const txt = th.textContent.trim().toLowerCase();
+            if (headers.some(h => txt.includes(h.toLowerCase()))) acc.push(idx);
+            return acc;
+          }, []);
+          if (!headerIdxs.length) return;
+
+          const yellowSet = new Set(yellow);
+          const redSet = new Set(red);
+
+          const body = t.tBodies[0] || t;
+          for (const r of body.rows) {
+            const prov = (r.cells[provinceCol]?.textContent || '').trim();
+            for (const idx of headerIdxs) {
+              const cell = r.cells[idx];
+              if (!cell) continue;
+              if (yellowSet.has(prov)) cell.classList.add(yellowClass);
+              if (redSet.has(prov))    cell.classList.add(redClass);
+            }
+          }
+        }
+
+
+        let sankeyReady = false;
+
         function initMaterialize(){
           const elems = document.querySelectorAll('.collapsible');
           M.Collapsible.init(elems, {
             accordion: false,
-            onOpenEnd: () => requestAnimationFrame(setHeight),
+            onOpenEnd: (el) => {
+              // jika panel yang dibuka berisi sankey, render/resize di sini
+              const holder = el.querySelector('#sankey-chart');
+              if (holder) {
+                if (!sankeyReady) {
+                  setupSankey();      // pertama kali: render saat sudah visible
+                  sankeyReady = true;
+                } else {
+                  Plotly.Plots.resize(holder);  // buka-tutup berikutnya: cukup resize
+                }
+              }
+              if (el.querySelector('#gen-table')) {
+                decorateTableByHeader({
+                  tableId: 'gen-table',
+                  headers: ['Baby Boomer', 'Pre-Boomer'],
+                  provinceCol: 0,
+                  yellow: [
+                    'Riau','Jambi','Bengkulu','Bangka-Belitung','Nusa Tenggara Barat',
+                    'Kalimantan Tengah','Kalimantan Utara','Sulawesi Tengah','Maluku Utara','Papua Barat'
+                  ],
+                  red: ['Maluku','Sulawesi Barat','Kepulauan Riau']
+                });
+              }
+
+
+                if (el.querySelector('#age-table')) {
+                decorateTableByHeader({
+                  tableId: 'age-table',
+                  headers: ['60+ yo'],
+                  provinceCol: 0,
+                  yellow: [
+                    'Riau','Jambi','Bengkulu','Bangka-Belitung','Nusa Tenggara Barat', 'Kalimantan Barat',
+                    'Kalimantan Tengah','Kalimantan Utara','Sulawesi Tengah','Maluku Utara','Papua Barat'
+                  ],
+                  red: ['Gorontalo','Sulawesi Barat','Kepulauan Riau']
+                });
+              }
+              requestAnimationFrame(setHeight);
+            },
             onCloseEnd: () => requestAnimationFrame(setHeight)
           });
           setHeight();
         }
 
+        const SANKEY_MAP = __SANKEY_MAP__;
+
+        // ====== Utilitas konversi ke format Plotly ======
+        function sankeyToPlotly(data) {
+          // data: [["source","target",value], ...]
+          const nodes = [...new Set(data.flatMap(([s,t,_]) => [s,t]))];
+          const index = Object.fromEntries(nodes.map((n,i)=>[n,i]));
+          return {
+            nodes,
+            link: {
+              source: data.map(([s]) => index[s]),
+              target: data.map(([,t]) => index[t]),
+              value:  data.map(([, ,v]) => v)
+            }
+          };
+        }
+
+        function renderSankey(choice='All'){
+          const el = document.getElementById('sankey-chart');
+          if(!el || typeof Plotly === 'undefined') return;
+          const arr = SANKEY_MAP[choice] || SANKEY_MAP['All'];
+          const {nodes, link} = sankeyToPlotly(arr);
+          const colors = ['#8dd3c7','#8CD5AE','#bebada','#E1A0A0','#DFC78C'];
+          const linkColors = link.value.map((_, i) => colors[i % colors.length]);
+
+          const trace = {
+            type: 'sankey',
+            node: { pad:20, thickness:20, label:nodes, line:{color:'#000', width:0.5} },
+            link: { ...link, color: linkColors }
+          };
+          const layout = {
+            margin:{l:0,r:0,t:8,b:8},
+            paper_bgcolor:'rgba(0,0,0,0)',
+            plot_bgcolor:'rgba(0,0,0,0)',
+            height: 420
+          };
+          Plotly.react(el, [trace], layout, {displayModeBar:false});
+          requestAnimationFrame(setHeight);
+        }
+
+        function setupSankey(){
+          const select = document.getElementById('sankey-filter');
+          const el = document.getElementById('sankey-chart');
+          if(!select || !el) return;
+
+          M.FormSelect.init(select);
+          renderSankey(select.value || 'All');
+
+          // 🔧 ini yang bikin dropdown bekerja
+          select.addEventListener('change', (e) => {
+            e.stopPropagation();                // aman di dalam collapsible
+            renderSankey(e.target.value);
+          });
+
+          // responsif
+          const ro = new ResizeObserver(() => Plotly.Plots.resize(el));
+          ro.observe(el);
+        }
         function clearActive(){
           cards.forEach(c => c.classList.remove('active'));
           activeId = null;
+          if (TITLE) TITLE.textContent = 'Topic';   // ⇦ reset judul
           LIST.innerHTML = "";
           HERO.innerHTML = "";
+          QUOTES.innerHTML = "";                     // pastikan quotes juga dibersihkan
           CLOSE_BAR.classList.remove('show');
           GRID.style.display = "";
           requestAnimationFrame(() => {
             GRID.classList.remove('is-hidden');
-            fadeOut(LIST); fadeOut(HERO);
+            fadeOut(LIST); fadeOut(HERO); fadeOut(QUOTES);
             setHeight();
           });
+          sankeyReady = false;  
         }
+
 
         function showPanel(id){
           HERO.innerHTML = HERO_BY_CARD[id] || "";
@@ -672,12 +1078,15 @@ card_html = """
           LIST.scrollIntoView({behavior:'smooth', block:'nearest'});
         }
 
+
         function toggleCard(card){
           const id = card.getAttribute('data-card');
           if (singleSelect && activeId === id) { clearActive(); return; }
           cards.forEach(c => c.classList.remove('active'));
           card.classList.add('active');
           activeId = id;
+          if (TITLE) TITLE.textContent = card.dataset.label || 'Topic';
+
 
           GRID.classList.add('is-hidden');
           setTimeout(function(){
@@ -701,9 +1110,11 @@ card_html = """
           fadeOut(HERO, function(){
             HERO.innerHTML = "";
             GRID.style.display = "";
+            TITLE.textContent = "Topic";
             requestAnimationFrame(() => { GRID.classList.remove('is-hidden'); setHeight(); });
             activeId = null;
             cards.forEach(c => c.classList.remove('active'));
+            sankeyReady = false;       
           });
         });
       })();
@@ -717,8 +1128,18 @@ card_html = """
 
 
 # Segmen full-bleed: diletakkan tanpa wrapper .content-wrap
+card_html = card_html.replace("__SANKEY_MAP__", json.dumps(dataset_map, ensure_ascii=False))
 card_html = card_html.replace("__OVERVIEW_HTML__", overview_html_js)
 card_html = card_html.replace("__CSV_DATA__", overview_csv_js)
 card_html = card_html.replace("__CSV_FILENAME__", csv_filename_sex)
+
+card_html = card_html.replace("__OVERVIEW_GEN_HTML__", overview_html_gen_js)
+card_html = card_html.replace("__CSV_GEN_DATA__", overview_csv_gen_js)
+card_html = card_html.replace("__CSV_GEN_FILENAME__", csv_filename_gen)
+
+
+card_html = card_html.replace("__OVERVIEW_AGE_HTML__", overview_html_age_js)
+card_html = card_html.replace("__CSV_AGE_DATA__", overview_csv_age_js)
+card_html = card_html.replace("__CSV_AGE_FILENAME__", csv_filename_age)
 
 components.html(card_html, height=0, scrolling=False)

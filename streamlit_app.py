@@ -8,7 +8,11 @@ import streamlit.components.v1 as components
 
 # --------------------- Page & Global CSS ---------------------
 st.set_page_config(layout="wide")
-
+st.markdown("""
+<style>
+.stApp { background: #ffffff !important; color: #111 !important; }
+</style>
+""", unsafe_allow_html=True)
 st.markdown("""
 <style>
 :root { --content-max: 1200px; --content-pad: 2rem; }
@@ -581,38 +585,35 @@ card_html = """
         };
 
         /* ==== Auto-resize iframe (lebih kuat) ==== */
-  function reportHeight(){
-    const h = Math.ceil(document.documentElement.scrollHeight);
-    window.parent.postMessage(
-      { isStreamlitMessage: true, type: "streamlit:setFrameHeight", height: h },
-      "*"
-    );
-  }
-  // Observer & hooks
-  new ResizeObserver(reportHeight).observe(document.body);
-  if (WRAP) new ResizeObserver(reportHeight).observe(WRAP);
-  window.addEventListener("load", reportHeight);
-  document.addEventListener("DOMContentLoaded", reportHeight);
-  
-        const ro1 = new ResizeObserver(reportHeight);
+        function setHeight(){
+          try{
+            const body = document.body;
+            const h = Math.ceil(Math.max(
+              body.scrollHeight, body.offsetHeight, body.clientHeight,
+              WRAP ? WRAP.scrollHeight : 0
+            ));
+            if (window.frameElement) window.frameElement.style.height = (h + 1) + 'px';
+          }catch(e){}
+        }
+        const ro1 = new ResizeObserver(setHeight);
         ro1.observe(document.body);
-        if (WRAP) { const ro2 = new ResizeObserver(reportHeight); ro2.observe(WRAP); }
-        window.addEventListener('load', reportHeight);
-        document.addEventListener('DOMContentLoaded', reportHeight);
+        if (WRAP) { const ro2 = new ResizeObserver(setHeight); ro2.observe(WRAP); }
+        window.addEventListener('load', setHeight);
+        document.addEventListener('DOMContentLoaded', setHeight);
 
         /* ==== Fade helpers ==== */
         function fadeOut(el, after){
           if(!el) return after && after();
           el.classList.add('fadeable', 'fade-hidden');
           el.style.opacity = '';
-          setTimeout(() => { if (after) after(); reportHeight(); }, 320);
+          setTimeout(() => { if (after) after(); setHeight(); }, 320);
         }
         function fadeIn(el){
           if(!el) return;
           el.classList.add('fadeable');
           el.classList.remove('fade-hidden');
           el.style.opacity = '';
-          setTimeout(reportHeight, 320);
+          setTimeout(setHeight, 320);
         }
 
         /* ==== Collapsible builder ==== */
@@ -638,10 +639,10 @@ card_html = """
           const elems = document.querySelectorAll('.collapsible');
           M.Collapsible.init(elems, {
             accordion: false,
-            onOpenEnd: reportHeight,
-            onCloseEnd: () => reportHeight
+            onOpenEnd: () => requestAnimationFrame(setHeight),
+            onCloseEnd: () => requestAnimationFrame(setHeight)
           });
-          reportHeight();
+          setHeight();
         }
 
         function clearActive(){
@@ -718,7 +719,7 @@ card_html = card_html.replace("__OVERVIEW_HTML__", overview_html_js)
 card_html = card_html.replace("__CSV_DATA__", overview_csv_js)
 card_html = card_html.replace("__CSV_FILENAME__", csv_filename_sex)
 
-components.html(card_html, height=300, scrolling=False)
+components.html(card_html, height=500, scrolling=False)
 
 # --------------------- Konten normal lagi (centered) ---------------------
 # === SEGMENT 3 (centered via spacer columns) ===

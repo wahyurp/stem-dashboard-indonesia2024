@@ -445,7 +445,7 @@ card_html = """
 
       /* WAVE + BACKGROUND SAMBUNG */
       .wave-wrap { position: relative; width: 100%; overflow: hidden; }
-      .wave-wrap svg { display: block; width: 100%; height: 120px; }
+      .wave-wrap svg { display: block; width: 100%;}
       .after-wave { background: #3498db; margin-top: -3%; padding: 40px 2vw 56px; }
     </style>
   </head>

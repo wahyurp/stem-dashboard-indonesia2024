@@ -2,3 +2,5 @@ streamlit
 pandas
 altair
 plotly
+openpyxl
+streamlit-lottie

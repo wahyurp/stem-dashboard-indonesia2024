@@ -717,27 +717,3 @@ card_html = card_html.replace("__CSV_FILENAME__", csv_filename_sex)
 
 components.html(card_html, height=1100, scrolling=False)
 
-# --------------------- Konten normal lagi (centered) ---------------------
-# === SEGMENT 3 (centered via spacer columns) ===
-l2, center2, r2 = st.columns([1, 10, 1], gap="small")
-
-with center2:
-    st.markdown('<div class="title-text" style="text-align:center;">Tematic Map</div>', unsafe_allow_html=True)
-    fig = make_choropleth(df_edunocup, "Province", "STEM Graduates in STEM Jobs", "Blues")
-    st.plotly_chart(fig, use_container_width=True)
-
-    # quote = """
-    # “Beyond the overall STEM talent underutilization, women experience a double disadvantage,
-    # highlighting the need for stronger industry-academia linkages and gender-inclusive policies
-    # to maximize STEM potential in the labor market.”
-    # """
-    # st.markdown(f"""
-    # <div style="background-color:#f0f0f0; padding:20px; border-radius:10px;
-    #   box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-    #   font-size:18px; font-style:italic; color:#333;
-    #   width:80%; margin:40px auto; text-align:center;">
-    #   “Beyond the overall STEM talent underutilization, women experience a double disadvantage,
-    #     highlighting the need for stronger industry-academia linkages and gender-inclusive policies
-    #     to maximize STEM potential in the labor market.”
-    # </div>
-    # """, unsafe_allow_html=True)

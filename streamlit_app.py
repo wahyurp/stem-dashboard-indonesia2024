@@ -580,24 +580,38 @@ card_html = """
           ]
         };
 
-        /* ==== Auto-resize iframe (lebih kuat) ==== */
-        function setHeight(){
-          try{
-            const body = document.body;
-            const h = Math.ceil(Math.max(
-              body.scrollHeight, body.offsetHeight, body.clientHeight,
-              WRAP ? WRAP.scrollHeight : 0
-            ));
-            if (window.frameElement) window.frameElement.style.height = (h + 1) + 'px';
-          }catch(e){}
+        
+        function reportHeight() {
+          // hitung tinggi halaman di dalam iframe
+          const h = Math.ceil(document.documentElement.scrollHeight);
+          // kirim ke Streamlit agar iFrame diubah dinamis
+          window.parent.postMessage(
+            { isStreamlitMessage: true, type: "streamlit:setFrameHeight", height: h },
+            "*"
+          );
         }
-        const ro1 = new ResizeObserver(setHeight);
-        ro1.observe(document.body);
-        if (WRAP) { const ro2 = new ResizeObserver(setHeight); ro2.observe(WRAP); }
-        window.addEventListener('load', setHeight);
-        document.addEventListener('DOMContentLoaded', setHeight);
-
-        /* ==== Fade helpers ==== */
+      
+        // Observer: panggil saat tinggi berubah
+        const ro = new ResizeObserver(reportHeight);
+        ro.observe(document.body);
+        if (WRAP) ro.observe(WRAP);
+      
+        window.addEventListener("load", reportHeight);
+        document.addEventListener("DOMContentLoaded", reportHeight);
+      
+        // --- di tempat Anda init Materialize:
+        window.initMaterialize = function () {
+          const elems = document.querySelectorAll(".collapsible");
+          M.Collapsible.init(elems, {
+            accordion: false,
+            onOpenEnd: reportHeight,
+            onCloseEnd: reportHeight,
+          });
+          reportHeight();
+        };
+      
+        // helper untuk animasi fade
+        window.afterAnim = () => setTimeout(reportHeight, 340);        /* ==== Fade helpers ==== */
         function fadeOut(el, after){
           if(!el) return after && after();
           el.classList.add('fadeable', 'fade-hidden');
@@ -663,6 +677,7 @@ card_html = """
 
           CLOSE_BAR.classList.add('show');
           fadeIn(HERO); fadeIn(LIST); fadeIn(QUOTES);
+          afterAnim();
           LIST.scrollIntoView({behavior:'smooth', block:'nearest'});
         }
 
@@ -695,7 +710,7 @@ card_html = """
           fadeOut(HERO, function(){
             HERO.innerHTML = "";
             GRID.style.display = "";
-            requestAnimationFrame(() => { GRID.classList.remove('is-hidden'); setHeight(); });
+            requestAnimationFrame(() => { GRID.classList.remove('is-hidden'); afterAnim(); });
             activeId = null;
             cards.forEach(c => c.classList.remove('active'));
           });
@@ -715,7 +730,7 @@ card_html = card_html.replace("__OVERVIEW_HTML__", overview_html_js)
 card_html = card_html.replace("__CSV_DATA__", overview_csv_js)
 card_html = card_html.replace("__CSV_FILENAME__", csv_filename_sex)
 
-components.html(card_html, height=1200, scrolling=False)
+components.html(card_html, height=300, scrolling=False)
 
 # --------------------- Konten normal lagi (centered) ---------------------
 # === SEGMENT 3 (centered via spacer columns) ===

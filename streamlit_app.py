@@ -260,6 +260,35 @@ overview_csv_age_js = _to_js_tpl_literal(overview_csv_age)
 csv_filename_age = "Percentage of STEM University Graduates by Age Group 2024.csv"
 
 
+## Disability Overview Table
+df_disability = pd.read_excel("data.xlsx", sheet_name="disability")
+
+legend_html = """
+<div class="rse-legend" style="margin-top:8px;font-size:.9rem;color:#6b7280">
+  Note: The concept of disability includes mild difficulty, severe difficulty, and complete inability.
+  &nbsp;&nbsp;&nbsp;
+  <span class="chip chip-yellow"></span> 25%≤RSE&lt;50%
+  &nbsp;&nbsp;&nbsp;
+  <span class="chip chip-red"></span> RSE≥50%
+</div>
+"""
+overview_csv_disability = df_disability.to_csv(index=False)
+
+overview_html_disability = df_disability.head(60).to_html(
+    index=False,
+    border=0,
+    classes="striped highlight responsive-table",
+    table_id="disability-table"  
+)
+overview_html_disability += legend_html
+
+
+overview_html_disability_js = _to_js_tpl_literal(overview_html_disability)
+
+overview_csv_disability_js = _to_js_tpl_literal(overview_csv_disability)
+csv_filename_disability = "Percentage of STEM University Graduates by Age Group 2024.csv"
+
+
 
 province_name_mapping = {
     "Aceh": "DI. ACEH",
@@ -665,7 +694,7 @@ card_html = """
           </div>
 
           <div class="card-button" role="button" tabindex="0" data-card="c3" data-label="Disability Representation in STEM Graduates">
-            <dotlottie-wc class="lottie" src="https://lottie.host/b2bb87b5-6a84-442a-9ee0-d4b29fae5f97/qw1cYx0jll.json" speed="1" autoplay loop></dotlottie-wc>
+            <dotlottie-wc class="lottie" src="https://lottie.host/db326799-1c61-45b9-855d-9360ed98dad7/vJkWU0LUHX.json" speed="1" autoplay loop></dotlottie-wc>
             <div class="label">Disability Representation in STEM Graduates</div>
           </div>
 
@@ -711,9 +740,16 @@ card_html = """
         const CSV_AGE_FILENAME = `__CSV_AGE_FILENAME__`;
 
 
+        const OVERVIEW_DISABILITY_HTML = `__OVERVIEW_DISABILITY_HTML__`;
+        const CSV_DISABILITY_DATA = `__CSV_DISABILITY_DATA__`;
+        const CSV_DISABILITY_FILENAME = `__CSV_DISABILITY_FILENAME__`;
+
+
         const CSV_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_DATA);
         const CSV_GEN_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_GEN_DATA);
         const CSV_AGE_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_AGE_DATA);
+        const CSV_DISABILITY_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_DISABILITY_DATA);
+
 
 
         const WRAP = document.getElementById('wrap');
@@ -757,6 +793,20 @@ card_html = """
                   </blockquote>
                 </div>
               </div>
+            </div>`,
+            c3: `<div class="container">
+              <div class="row hero-row">
+                <div class="col s12 m5 l4 center-align">
+                  <dotlottie-wc class="hero-lottie"
+                    src="https://lottie.host/db326799-1c61-45b9-855d-9360ed98dad7/vJkWU0LUHX.json"
+                    autoplay loop speed="1"></dotlottie-wc>
+                </div>
+                <div class="col s12 m7 l8">
+                  <blockquote class="quote-block gray-text flow-text">
+                    Persons with disabilities accounted for just 3.22% of STEM university graduates in Indonesia, showing that their presence in the field is still limited. While most provinces mirror this national pattern, higher proportions are seen in Gorontalo (4.98%), DKI Jakarta (4.81%), and Banten (4.63%), suggesting stronger visibility or inclusion efforts, whereas Bengkulu (0.77%) and Kepulauan Riau (0.93%) record the lowest shares. 
+                  </blockquote>
+                </div>
+              </div>
             </div>`
         };
 
@@ -774,6 +824,12 @@ card_html = """
               font-size:18px; font-style:italic; color:#333;
               width:80%; margin:40px auto; text-align:center;">
               “Millennials dominate Indonesia’s STEM graduates, while Gen Z is emerging, underscoring the need to integrate new talent while drawing on older generations’ expertise.”
+            </div>`,
+          c3:`<div style="background-color:#f0f0f0; padding:20px; border-radius:10px;
+              box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+              font-size:18px; font-style:italic; color:#333;
+              width:80%; margin:40px auto; text-align:center;">
+              “The uneven regional representation of STEM graduates with disabilities highlights the need to strengthen inclusive education and improve accessibility to expand opportunities across Indonesia.”
             </div>`
         };
 
@@ -812,8 +868,7 @@ card_html = """
             { t:"Percentage of STEM University Graduates by Age Group, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_AGE_HTML, csvAge:true }
           ],
           c3: [
-            { t:"Participation", body:"Tingkat partisipasi & hambatan."},
-            { t:"Support", body:"Dukungan & akomodasi yang efektif."}
+            { t:"Percentage of STEM University Graduates by Disability Condition, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_DISABILITY_HTML, csvDisability:true },
           ],
           c4: [
             { t:"Match Quality", body:"Kesesuaian jurusan–pekerjaan & wage premium."},
@@ -882,6 +937,14 @@ card_html = """
                   <i class="material-icons">download</i>
                 </a>`);
             }
+            if (it.csvDisability) {
+              btns.push(`
+                <a href="${CSV_DISABILITY_URL}" download="${CSV_DISABILITY_FILENAME}"
+                  class="btn-flat waves-effect download-btn"
+                  title="Download CSV" onclick="event.stopPropagation();">
+                  <i class="material-icons">download</i>
+                </a>`);
+            }
             const downloads = btns.join('');
 
             // Body
@@ -904,42 +967,76 @@ card_html = """
 
 
 
-        function decorateTableByHeader({
-          tableId,                 
-          headers = [],            
-          provinceCol = 0,         
-          yellow = [],            
-          red = [],                
-          yellowClass = 'rse-yellow',
-          redClass = 'rse-red',
-        }) {
-          const t = document.getElementById(tableId);
-          if (!t) return;
+          function decorateTableByHeader({
+            tableId,
+            headers = [],            // label header target
+            provinceCol = 0,         // index kolom provinsi (baris)
+            yellow = [],             // daftar provinsi -> kuning
+            red = [],                // daftar provinsi -> merah
+            yellowClass = 'rse-yellow',
+            redClass = 'rse-red',
+            exact = false,           // true = exact match, false = includes
+            caseSensitive = false,   // abaikan kapitalisasi?
+            boldLastRow = false,     // tebalin baris terakhir?
+            debug = false
+          }) {
+            const t = document.getElementById(tableId);
+            if (!t) { if (debug) console.warn('Table not found:', tableId); return; }
 
-          // Temukan index kolom yang head-nya match salah satu dari `headers`
-          const headCells = (t.tHead ? t.tHead.rows[0].cells : t.rows[0].cells);
-          const headerIdxs = Array.from(headCells).reduce((acc, th, idx) => {
-            const txt = th.textContent.trim().toLowerCase();
-            if (headers.some(h => txt.includes(h.toLowerCase()))) acc.push(idx);
-            return acc;
-          }, []);
-          if (!headerIdxs.length) return;
+            // normalisasi teks (rapikan spasi; opsional lowercasing)
+            const normalize = s => s.replace(/\s+/g, ' ').trim();
+            const norm = s => caseSensitive ? normalize(s) : normalize(s).toLowerCase();
 
-          const yellowSet = new Set(yellow);
-          const redSet = new Set(red);
+            // ambil sel header (thead kalau ada, fallback ke baris pertama)
+            const headRow = t.tHead ? t.tHead.rows[0] : t.rows[0];
+            if (!headRow) { if (debug) console.warn('No header row in table:', tableId); return; }
+            const headCells = Array.from(headRow.cells);
 
-          const body = t.tBodies[0] || t;
-          for (const r of body.rows) {
-            const prov = (r.cells[provinceCol]?.textContent || '').trim();
-            for (const idx of headerIdxs) {
-              const cell = r.cells[idx];
-              if (!cell) continue;
-              if (yellowSet.has(prov)) cell.classList.add(yellowClass);
-              if (redSet.has(prov))    cell.classList.add(redClass);
+            // tentukan indeks kolom target berdasarkan headers
+            let headerIdxs = [];
+            if (exact) {
+              const headerSet = new Set(headers.map(norm));
+              headerIdxs = headCells.reduce((acc, th, idx) => {
+                const txt = norm(th.textContent);
+                if (headerSet.has(txt)) acc.push(idx);
+                return acc;
+              }, []);
+            } else {
+              const headersNorm = headers.map(norm);
+              headerIdxs = headCells.reduce((acc, th, idx) => {
+                const txt = norm(th.textContent);
+                if (headersNorm.some(h => txt.includes(h))) acc.push(idx);
+                return acc;
+              }, []);
+            }
+
+            if (debug) console.log({ tableId, headers, exact, caseSensitive, headerIdxs });
+
+            if (!headerIdxs.length) { if (debug) console.warn('Target headers not found:', headers); return; }
+
+            const yellowSet = new Set(yellow);
+            const redSet = new Set(red);
+
+            const body = t.tBodies[0] || t;
+            for (const r of Array.from(body.rows)) {
+              const provCell = r.cells[provinceCol];
+              if (!provCell) continue;
+              const prov = normalize(provCell.textContent);
+
+              for (const idx of headerIdxs) {
+                const cell = r.cells[idx];
+                if (!cell) continue;
+                if (yellowSet.has(prov)) cell.classList.add(yellowClass);
+                if (redSet.has(prov))    cell.classList.add(redClass);
+              }
+            }
+
+            if (boldLastRow) {
+              const rows = Array.from(body.rows);
+              const last = rows[rows.length - 1];
+              if (last) last.style.fontWeight = '700';
             }
           }
-        }
-
 
         let sankeyReady = false;
 
@@ -973,17 +1070,31 @@ card_html = """
 
 
                 if (el.querySelector('#age-table')) {
-                decorateTableByHeader({
-                  tableId: 'age-table',
-                  headers: ['60+ yo'],
-                  provinceCol: 0,
-                  yellow: [
-                    'Riau','Jambi','Bengkulu','Bangka-Belitung','Nusa Tenggara Barat', 'Kalimantan Barat',
-                    'Kalimantan Tengah','Kalimantan Utara','Sulawesi Tengah','Maluku Utara','Papua Barat'
-                  ],
-                  red: ['Gorontalo','Sulawesi Barat','Kepulauan Riau']
-                });
-              }
+                  decorateTableByHeader({
+                    tableId: 'age-table',
+                    headers: ['60+ yo'],
+                    provinceCol: 0,
+                    yellow: [
+                      'Riau','Jambi','Bengkulu','Bangka-Belitung','Nusa Tenggara Barat', 'Kalimantan Barat',
+                      'Kalimantan Tengah','Kalimantan Utara','Sulawesi Tengah','Maluku Utara','Papua Barat'
+                    ],
+                    red: ['Gorontalo','Sulawesi Barat','Kepulauan Riau']
+                  });
+                }
+
+                if (el.querySelector('#disability-table')) {
+                  decorateTableByHeader({
+                    tableId: 'disability-table',
+                    headers: ['disabled'],
+                    provinceCol: 0,
+                    yellow: [
+                      'Riau','Jambi','Sumatera Selatan','Bengkulu','Lampung','Bangka-Belitung','DKI Jakarta','D I Yogyakarta','Banten','Bali','Nusa Tenggara Barat', 'Kalimantan Barat',
+                      'Kalimantan Tengah','Kalimantan Selatan','Kalimantan Timur','Sulawesi Utara','Sulawesi Tengah','Sulawesi Selatan','Sulawesi Tenggara','Gorontalo','Sulawesi Barat','Maluku','Papua','Papua Barat'
+                    ],
+                    red: ['Kalimantan Utara'],
+                    exact: true
+                  });
+                }
               requestAnimationFrame(setHeight);
             },
             onCloseEnd: () => requestAnimationFrame(setHeight)
@@ -1039,7 +1150,6 @@ card_html = """
           M.FormSelect.init(select);
           renderSankey(select.value || 'All');
 
-          // 🔧 ini yang bikin dropdown bekerja
           select.addEventListener('change', (e) => {
             e.stopPropagation();                // aman di dalam collapsible
             renderSankey(e.target.value);
@@ -1141,6 +1251,10 @@ card_html = card_html.replace("__CSV_GEN_FILENAME__", csv_filename_gen)
 card_html = card_html.replace("__OVERVIEW_AGE_HTML__", overview_html_age_js)
 card_html = card_html.replace("__CSV_AGE_DATA__", overview_csv_age_js)
 card_html = card_html.replace("__CSV_AGE_FILENAME__", csv_filename_age)
+
+card_html = card_html.replace("__OVERVIEW_DISABILITY_HTML__", overview_html_disability_js)
+card_html = card_html.replace("__CSV_DISABILITY_DATA__", overview_csv_disability_js)
+card_html = card_html.replace("__CSV_DISABILITY_FILENAME__", csv_filename_disability)
 
 components.html(card_html, height=0, scrolling=False)
 

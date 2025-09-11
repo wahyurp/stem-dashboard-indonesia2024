@@ -1355,6 +1355,8 @@ card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
 # siapkan token
 df_js = df_edunocup[["Province", "STEM Graduates in STEM Jobs"]].copy()
+if df_js['Province'].iloc[-1].strip().casefold() == 'indonesia':
+    df_js = df_js.iloc[:-1]
 df_js["Province"] = df_js["Province"].replace(province_name_mapping)
 
 data_dict = {

@@ -590,15 +590,26 @@ card_html = """
         margin-bottom: 20px;
       }
 
-      /* GRID CARD */
+
       .cards-grid.container {
-        display:grid;
+        display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 24px;
         max-width: 1200px;
-        margin: 0 auto 36px;         /* beri jarak bawah dari hero/section berikutnya */
-        transition: opacity .3s ease, transform .3s ease;
+        margin: 0 auto 36px;
       }
+
+      @media (min-width: 600px) and (max-width: 1375px) {
+        .cards-grid.container {
+          grid-template-columns: repeat(3, 1fr); /* paksa 3 kolom */
+        }
+
+        /* Kalau card terakhir adalah card ke-4, letakkan di kolom tengah */
+        .cards-grid.container .card-button:nth-child(4) {
+          grid-column: 2;
+        }
+      }
+
       .cards-grid.is-hidden {
         opacity: 0;
         transform: translateY(6px);

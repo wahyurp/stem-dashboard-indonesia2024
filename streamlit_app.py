@@ -390,8 +390,7 @@ components.html("""
     }
     .quote-card i { color:#fff; margin-right:8px; }
 
-    /* Wave separator: ditempatkan di atas latar biru, path-nya putih,
-       sehingga transisi ke section putih di bawahnya halus */
+
     .wave-container {
       width:100%;
       height:200px;
@@ -404,7 +403,7 @@ components.html("""
 </head>
 <body>
 
-  <!-- HERO BIRU (teks putih) -->
+
   <div class="hero-blue">
     <div class=" hero-pad">
       <div class="row valign-wrapper">
@@ -442,7 +441,7 @@ components.html("""
     </div>
   </div>
 
-  <!-- WAVE: putih, transisi dari biru ke putih -->
+
 <div class="wave-container">
   <svg viewBox="0 0 1000 200" preserveAspectRatio="none" style="width: 100%; height: 100%;">
     <path
@@ -475,102 +474,6 @@ components.html("""
 </html>
 """, height=800, scrolling=False)
 
-# --------------------- Konten normal (centered) ---------------------
-# # === SEGMENT 1: anchor yang 'membungkus' blok Streamlit berikutnya ===
-# st.markdown('<div id="wrap-s1"></div>', unsafe_allow_html=True)
-# st.markdown("""
-# <style>
-# /* Wrapper persis SETELAH anchor (kadang ada 1-2 level pembungkus) */
-# #wrap-s1 + div,
-# #wrap-s1 + div > div,
-# #wrap-s1 + div > div > div{
-#   max-width: 1200px !important;
-#   margin-left: auto !important;
-#   margin-right: auto !important;
-#   padding-left: 2rem !important;
-#   padding-right: 2rem !important;
-# }
-# @media (max-width: 600px){
-#   #wrap-s1 + div,
-#   #wrap-s1 + div > div,
-#   #wrap-s1 + div > div > div{
-#     padding-left: 1rem !important;
-#     padding-right: 1rem !important;
-#   }
-# }
-# </style>
-# """, unsafe_allow_html=True)
-# # === SEGMENT 1 (centered via spacer columns) ===
-# left_pad, mid, right_pad = st.columns([1, 10, 1], gap="small")
-
-# H_SEX = "— 𝗦𝗲𝘅 —"
-# H_REGION = "— 𝗥𝗲𝗴𝗶𝗼𝗻 —"
-
-# grouped_options = [
-#     "All",
-#     H_SEX, "Female", "Male",
-#     H_REGION, "Sumatera", "Jawa–Bali", "Kalimantan", "Sulawesi",
-#     "Nusa Tenggara, Maluku, Papua"
-# ]
-
-# def _block_header_choice():
-#     v = st.session_state["filters_grouped"]
-#     if v in (H_SEX, H_REGION):
-#         # kembalikan ke All jika user mengklik header
-#         st.session_state["filters_grouped"] = "All"
-# with mid:
-#   st.markdown('<div class="title-text" style="text-align:center;">Distribution of STEM University Graduates by Employment Status, 2024</div>', unsafe_allow_html=True)
-#   choice = st.selectbox(
-#       "Filters",
-#       grouped_options,
-#       index=0, # default = All
-#       key="filters_grouped",
-#       on_change=_block_header_choice,
-#       help="Please choose value. Header 'Sex' dan 'Region' cannot be selected."
-#   )
-#   data_selected = dataset_map[choice]
-
-#   # Bangun fig baru
-#   fig_pipeline = make_sankey(data_selected)
-
-#   # Tampilkan chart
-#   st.plotly_chart(fig_pipeline, use_container_width=True, config={"displayModeBar": False})
-# # with mid:
-# #     col1, col2 = st.columns([3, 2], gap="large")
-# #     with col1:
-# #         st.markdown("""
-# #             <div class="title-text">STEM Pathways and Gender Gap</div>
-# #             <div class="paragraph-text">
-# #             Most STEM university graduates are absorbed into employment (79.39%), 
-# #             yet a striking mismatch persists as only 18.39% work in STEM-related jobs 
-# #             while the majority (61.00%) shift to non-STEM fields.<br><br>
-# #             Male graduates show higher employment rates (86.21%) and better alignment 
-# #             with STEM jobs (21.09%) compared to females, who face lower employment (73.56%), 
-# #             higher unemployment (25.62%), and weaker STEM job integration (16.09%).
-# #             </div>
-# #         """, unsafe_allow_html=True)
-
-# #     with col2:
-# #         choice = st.selectbox(
-# #             "Filters",
-# #             grouped_options,
-# #             index=0,                         # default = All
-# #             key="filters_grouped",
-# #             on_change=_block_header_choice,
-# #             help="Please choose value. Header 'Sex' dan 'Region' cannot be selected."
-# #         # )
-# #         fig_pipeline.update_layout(
-# #             margin=dict(l=0, r=0, t=0, b=50),
-# #             paper_bgcolor="rgba(0,0,0,0)",
-# #             plot_bgcolor="rgba(0,0,0,0)",
-# #             height=320  # opsional: sesuaikan selera
-# #         )
-# #         st.plotly_chart(fig_pipeline, use_container_width=True, config={"displayModeBar": False})
-
-
-
-
-# --------------------- Segmen FULL-BLEED (hanya bagian ini) ---------------------
 card_html = """
 <html>
   <head>
@@ -604,7 +507,6 @@ card_html = """
           grid-template-columns: repeat(3, 1fr); /* paksa 3 kolom */
         }
 
-        /* Kalau card terakhir adalah card ke-4, letakkan di kolom tengah */
         .cards-grid.container .card-button:nth-child(4) {
           grid-column: 2;
         }
@@ -667,17 +569,17 @@ card_html = """
         border-radius: 10px;
       }
 
-      /* CLOSE BAR */
+
       #close-bar { display:none; margin:12px auto 0; }
       #close-bar.show { display:block; }
 
       .blue-text { color:#3498db !important; }
       .gray-text { color:#6b7280 !important; }
-      /* highlight sel */
+
       .rse-yellow{ background:#fff3bf !important; }  /* kuning lembut */
       .rse-red{    background:#ffc9c9 !important; }  /* merah lembut */
 
-      /* legend kecil di bawah tabel */
+
       .rse-legend .chip{
         display:inline-block; width:12px; height:12px;
         border-radius:2px; vertical-align:middle; margin:0 6px 0 0;
@@ -1046,15 +948,15 @@ card_html = """
 
           function decorateTableByHeader({
             tableId,
-            headers = [],            // label header target
-            provinceCol = 0,         // index kolom provinsi (baris)
-            yellow = [],             // daftar provinsi -> kuning
-            red = [],                // daftar provinsi -> merah
+            headers = [],            
+            provinceCol = 0,         
+            yellow = [],             
+            red = [],                
             yellowClass = 'rse-yellow',
             redClass = 'rse-red',
-            exact = false,           // true = exact match, false = includes
-            caseSensitive = false,   // abaikan kapitalisasi?
-            boldLastRow = false,     // tebalin baris terakhir?
+            exact = false,           
+            caseSensitive = false,   
+            boldLastRow = false,     
             debug = false
           }) {
             const t = document.getElementById(tableId);
@@ -1126,10 +1028,10 @@ card_html = """
               const holder = el.querySelector('#sankey-chart');
               if (holder) {
                 if (!sankeyReady) {
-                  setupSankey();      // pertama kali: render saat sudah visible
+                  setupSankey();      
                   sankeyReady = true;
                 } else {
-                  Plotly.Plots.resize(holder);  // buka-tutup berikutnya: cukup resize
+                  Plotly.Plots.resize(holder);  
                 }
               }
               if (el.querySelector('#gen-table')) {
@@ -1228,7 +1130,7 @@ card_html = """
           renderSankey(select.value || 'All');
 
           select.addEventListener('change', (e) => {
-            e.stopPropagation();                // aman di dalam collapsible
+            e.stopPropagation();                
             renderSankey(e.target.value);
           });
 
@@ -1239,10 +1141,10 @@ card_html = """
         function clearActive(){
           cards.forEach(c => c.classList.remove('active'));
           activeId = null;
-          if (TITLE) TITLE.textContent = 'Topic';   // ⇦ reset judul
+          if (TITLE) TITLE.textContent = 'Topic';   
           LIST.innerHTML = "";
           HERO.innerHTML = "";
-          QUOTES.innerHTML = "";                     // pastikan quotes juga dibersihkan
+          QUOTES.innerHTML = "";                     
           CLOSE_BAR.classList.remove('show');
           GRID.style.display = "";
           requestAnimationFrame(() => {
@@ -1381,9 +1283,6 @@ card_html = """
 
 
 
-
-
-# Segmen full-bleed: diletakkan tanpa wrapper .content-wrap
 card_html = card_html.replace("__SANKEY_MAP__", json.dumps(dataset_map, ensure_ascii=False))
 card_html = card_html.replace("__OVERVIEW_HTML__", overview_html_js)
 card_html = card_html.replace("__CSV_DATA__", overview_csv_js)
@@ -1406,7 +1305,7 @@ card_html = card_html.replace("__CSV_DISABILITY_FILENAME__", csv_filename_disabi
 card_html = card_html.replace("__OVERVIEW_EDUNOCUP_HTML__", overview_html_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
-# siapkan token
+
 df_js = df_edunocup[["Province", "STEM Graduates in STEM Jobs"]].copy()
 if df_js['Province'].iloc[-1].strip().casefold() == 'indonesia':
     df_js = df_js.iloc[:-1]
@@ -1419,11 +1318,11 @@ data_dict = {
 
 geojson_str = json.dumps(indonesia_geojson, ensure_ascii=False)
 data_map = {
-    "locations": df_js["Province"].tolist(),  # atau langsung dari df_edunocup dengan mapping
+    "locations": df_js["Province"].tolist(),  
     "values": df_js["STEM Graduates in STEM Jobs"].tolist()
 }
 card_html = card_html.replace("__GEOJSON__", geojson_str)
 card_html = card_html.replace("__MAPDATA__", json.dumps(data_map, ensure_ascii=False))
 
-# render SATU komponen saja:
+
 components.html(card_html, height=0, scrolling=False)

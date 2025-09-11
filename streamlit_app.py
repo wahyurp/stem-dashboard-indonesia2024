@@ -1283,29 +1283,63 @@ card_html = """
           });
         });
 
-        const GEOJSON = __GEOJSON__;        // token diganti dari Python
-        const MAPDATA = __MAPDATA__;        // token diganti dari Python
-        (function(){
-          try {
-            const names = new Set(GEOJSON.features.map(f => String(f.properties.Propinsi).trim().toUpperCase()));
-            const miss = (MAPDATA.locations || []).filter(n => !names.has(String(n).trim().toUpperCase()));
-            if (miss.length) {
-              console.log('Unmatched locations:', miss);
-            }
-          } catch(e) { console.warn(e); }
-        })();
-        Plotly.newPlot("choropleth", [{
-          type: "choropleth",
-          geojson: GEOJSON,
-          featureidkey: "properties.Propinsi",
-          locations: MAPDATA.locations,
-          z: MAPDATA.values,
-          colorscale: "Blues",
-          marker: { line: { color: "black", width: 0.5 } },
-          colorbar: { title: "STEM Graduates" }
-        }], { geo:{fitbounds:"locations", visible:false}, margin:{t:0,r:0,b:0,l:0}, height:500 }, {responsive:true})
-        .then(() => setHeight());  // panggil setHeight() yang sudah ada di iframe 1
+        const GEOJSON = __GEOJSON__;
+        const MAPDATA_RAW = __MAPDATA__;
 
+        // 1) Deteksi key properti di GeoJSON (Provinsi vs Propinsi)
+        const props0 = GEOJSON?.features?.[0]?.properties || {};
+        const FEATURE_KEY = ('Provinsi' in props0) ? 'Provinsi'
+                          : ('Propinsi' in props0) ? 'Propinsi'
+                          : Object.keys(props0)[0];
+
+        // 2) Fungsi kanonisasi: buang spasi/titik/strip, uppercase.
+        //    Ini bikin "DI. ACEH" == "ACEH" == "Di Aceh" == "di-aceh".
+        const canon = s => String(s ?? '')
+          .normalize('NFKD')
+          .replace(/[.\s\u00A0\-–—_/]/g, '')  // spasi, non-break, strip variasi
+          .toUpperCase().trim();
+
+        // 3) Buat peta dari bentuk kanonik -> nama persis di GeoJSON
+        const geoNameMap = new Map(
+          (GEOJSON.features || []).map(f => {
+            const raw = f.properties[FEATURE_KEY];
+            return [canon(raw), String(raw)];
+          })
+        );
+
+        // 4) Ubah locations dari data menjadi nama persis yang ada di GeoJSON
+        const locationsCanon  = (MAPDATA_RAW.locations || []).map(canon);
+        const locationsFixed  = locationsCanon.map(k => geoNameMap.get(k));
+
+        // Debug ringan (kalau masih ada yang gagal akan terlihat “null”)
+        const misses = locationsFixed.reduce((a,n,i)=> (n? a : a.concat(MAPDATA_RAW.locations[i])), []);
+        if (misses.length) console.warn('Masih tidak ketemu:', misses);
+
+        // 5) Pastikan z numerik
+        const values = (MAPDATA_RAW.values || []).map(v => +v);
+
+        // 6) Render setelah Plotly siap
+        (function whenPlotlyReady(cb){
+          if (window.Plotly) return cb();
+          const t = setInterval(()=>{ if (window.Plotly){ clearInterval(t); cb(); }}, 50);
+        })(function(){
+          Plotly.newPlot(
+            "choropleth",
+            [{
+              type: "choropleth",
+              geojson: GEOJSON,
+              featureidkey: `properties.${FEATURE_KEY}`,
+              locations: locationsFixed,   // nama PERSIS dari GeoJSON
+              z: values,
+              colorscale: "Blues",
+              marker: { line: { color: "white", width: 0.5 } },
+              colorbar: { title: "STEM Graduates" }
+            }],
+            { geo: { fitbounds: "locations", visible: false },
+              margin: { t: 0, r: 0, b: 0, l: 0 }, height: 500 },
+            { responsive: true }
+          ).then(() => setHeight());
+        });
         CLOSE_BTN.addEventListener('click', function(){
           CLOSE_BAR.classList.remove('show');
           fadeOut(LIST, function(){ LIST.innerHTML = ""; setHeight(); });

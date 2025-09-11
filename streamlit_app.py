@@ -1310,7 +1310,7 @@ card_html = card_html.replace("__OVERVIEW_EDUNOCUP_HTML__", overview_html_edunoc
 card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
 
-components.html(card_html, height=300, scrolling=False)
+components.html(card_html, height=800, scrolling=False)
 
 
 ##======== SEGMEN 3 ========

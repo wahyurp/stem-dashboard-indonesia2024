@@ -1304,7 +1304,7 @@ card_html = """
         console.log('Nama-nama provinsi:', provNames);
 
         // (Opsional) tampilkan tabel dengan versi kanonik untuk bantu debug pencocokan
-        const canon = s => String(s)
+        var canon = s => String(s)
           .normalize('NFKD')
           .replace(/[.\s\u00A0\-–—_/]/g, '')
           .toUpperCase();
@@ -1322,7 +1322,7 @@ card_html = """
 
         // 2) Fungsi kanonisasi: buang spasi/titik/strip, uppercase.
         //    Ini bikin "DI. ACEH" == "ACEH" == "Di Aceh" == "di-aceh".
-        const canon = s => String(s ?? '')
+        var canon = s => String(s ?? '')
           .normalize('NFKD')
           .replace(/[.\s\u00A0\-–—_/]/g, '')  // spasi, non-break, strip variasi
           .toUpperCase().trim();

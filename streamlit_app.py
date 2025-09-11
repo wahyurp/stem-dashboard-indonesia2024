@@ -1314,12 +1314,51 @@ components.html(card_html, height=300, scrolling=False)
 
 
 ##======== SEGMEN 3 ========
-l2, center2, r2 = st.columns([1, 10, 1], gap="small")
 
-with center2:
-    st.markdown('<div class="title-text" style="text-align:center; margin-top:5%">Map STEM Graduates</div>', unsafe_allow_html=True)
-    fig = make_choropleth(df_edunocup, "Province", "STEM Graduates in STEM Jobs", "Blues")
-    st.plotly_chart(fig, use_container_width=True)
+with open("indonesia-prov-clean.geojson", "r", encoding="utf-8") as f:
+    indonesia_geojson = json.load(f)
+
+df_js = df_edunocup[["Province", "STEM Graduates in STEM Jobs"]].copy()
+df_js["Province"] = df_js["Province"].replace(province_name_mapping)
+
+data_dict = {
+    "locations": df_js["Province"].tolist(),
+    "values": df_js["STEM Graduates in STEM Jobs"].tolist()
+}
+
+# 2. Serialisasi ke JS string
+geojson_str = json.dumps(indonesia_geojson, ensure_ascii=False)
+data_str = json.dumps(data_dict, ensure_ascii=False)
+
+# 3. Inject ke komponen HTML
+components.html(f"""
+<div id="choropleth" style="width:100%;height:500px;"></div>
+<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+<script>
+  const geojson = {geojson_str};
+  const dataMap = {data_str};
+
+  var trace = {{
+    type: "choropleth",
+    locationmode: "geojson-id",
+    geojson: geojson,
+    featureidkey: "properties.Propinsi",   // Tambahkan ini
+    locations: dataMap.locations,
+    z: dataMap.values,
+    colorscale: "Blues",
+    marker: {{ line: {{ color: "black", width: 0.5 }} }},
+    colorbar: {{ title: "STEM Graduates" }}
+  }};
+
+  var layout = {{
+    geo: {{ fitbounds: "locations", visible: false }},
+    margin: {{ t:0, r:0, l:0, b:0 }},
+    paper_bgcolor: "white"
+  }};
+
+  Plotly.newPlot("choropleth", [trace], layout, {{responsive: true}});
+</script>
+""", height=600)
 
 
 

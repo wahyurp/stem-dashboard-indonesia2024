@@ -744,7 +744,6 @@ card_html = """
     <!-- Materialize JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
     <script>
       (function(){
         const OVERVIEW_HTML = `__OVERVIEW_HTML__`;
@@ -1283,7 +1282,7 @@ card_html = """
             if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleCard(card); }
           });
         });
-        <script>
+        
         const GEOJSON = __GEOJSON__;        // token diganti dari Python
         const MAPDATA = __MAPDATA__;        // token diganti dari Python
 

@@ -179,23 +179,16 @@ def load_lottiefile(filepath: str):
 with open("indonesia-prov-clean.geojson", "r", encoding="utf-8") as f:
     indonesia_geojson = json.load(f)
 
-df_edunocup = pd.read_excel("data.xlsx", sheet_name="edunocup")
 
-
+def _to_js_tpl_literal(s: str) -> str:
+    return s.replace("\\", "\\\\").replace("`", "\\`")
 
 ## Sex Overview Table
 df_sex = pd.read_excel("data.xlsx", sheet_name="sex")
 
-overview_html = df_sex.to_html(
-    index=False,
-    border=0,
-    classes="striped highlight responsive-table"  # kelas2 Materialize
-)
 
 overview_csv = df_sex.to_csv(index=False)
 overview_html = df_sex.head(60).to_html(index=False, border=0, classes="striped highlight responsive-table")
-def _to_js_tpl_literal(s: str) -> str:
-    return s.replace("\\", "\\\\").replace("`", "\\`")
 
 overview_html_js = _to_js_tpl_literal(overview_html)
 
@@ -289,7 +282,21 @@ overview_csv_disability_js = _to_js_tpl_literal(overview_csv_disability)
 csv_filename_disability = "Percentage of STEM University Graduates by Age Group 2024.csv"
 
 
+## Education and Occupaction Overview Table
 
+df_edunocup = pd.read_excel("data.xlsx", sheet_name="edunocup")
+
+overview_csv_edunocup = df_edunocup.to_csv(index=False)
+overview_html_edunocup = df_edunocup.head(60).to_html(index=False, border=0, classes="striped highlight responsive-table")
+
+overview_html_edunocup_js = _to_js_tpl_literal(overview_html_edunocup)
+
+overview_csv_edunocup_js = _to_js_tpl_literal(overview_csv_edunocup)
+csv_filename_edunocup = "University Graduates by Education and Occupation in STEM 2024.csv"
+
+
+
+## ============= Choropleth Map =============
 province_name_mapping = {
     "Aceh": "DI. ACEH",
     "Sumatera Utara": "SUMATERA UTARA",
@@ -744,12 +751,16 @@ card_html = """
         const CSV_DISABILITY_DATA = `__CSV_DISABILITY_DATA__`;
         const CSV_DISABILITY_FILENAME = `__CSV_DISABILITY_FILENAME__`;
 
+        const OVERVIEW_EDUNOCUP_HTML = `__OVERVIEW_EDUNOCUP_HTML__`;
+        const CSV_EDUNOCUP_DATA = `__CSV_EDUNOCUP_DATA__`;
+        const CSV_EDUNOCUP_FILENAME = `__CSV_EDUNOCUP_FILENAME__`;
+
 
         const CSV_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_DATA);
         const CSV_GEN_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_GEN_DATA);
         const CSV_AGE_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_AGE_DATA);
         const CSV_DISABILITY_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_DISABILITY_DATA);
-
+        const CSV_EDUNOCUP_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_EDUNOCUP_DATA);
 
 
         const WRAP = document.getElementById('wrap');
@@ -807,6 +818,20 @@ card_html = """
                   </blockquote>
                 </div>
               </div>
+            </div>`,
+            c4: `<div class="container">
+              <div class="row hero-row">
+                <div class="col s12 m5 l4 center-align">
+                  <dotlottie-wc class="hero-lottie"
+                    src="https://lottie.host/b2bb87b5-6a84-442a-9ee0-d4b29fae5f97/qw1cYx0jll.json"
+                    autoplay loop speed="1"></dotlottie-wc>
+                </div>
+                <div class="col s12 m7 l8">
+                  <blockquote class="quote-block gray-text flow-text">
+                    Nationally, only 11.46% of graduates are employed in STEM jobs aligned with their education, while a much larger proportion (21.94%) shift into non-STEM roles. Nearly one in four graduates experience a job–education misalignment, underscoring the gap between academic training and labor market absorption. 
+                  </blockquote>
+                </div>
+              </div>
             </div>`
         };
 
@@ -830,6 +855,12 @@ card_html = """
               font-size:18px; font-style:italic; color:#333;
               width:80%; margin:40px auto; text-align:center;">
               “The uneven regional representation of STEM graduates with disabilities highlights the need to strengthen inclusive education and improve accessibility to expand opportunities across Indonesia.”
+            </div>`,
+          c4:`<div style="background-color:#f0f0f0; padding:20px; border-radius:10px;
+              box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+              font-size:18px; font-style:italic; color:#333;
+              width:80%; margin:40px auto; text-align:center;">
+              “This pattern suggests persistent underutilization of STEM talent and structural mismatches between higher education output and labor market absorption.”
             </div>`
         };
 
@@ -871,8 +902,7 @@ card_html = """
             { t:"Percentage of STEM University Graduates by Disability Condition, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_DISABILITY_HTML, csvDisability:true },
           ],
           c4: [
-            { t:"Match Quality", body:"Kesesuaian jurusan–pekerjaan & wage premium."},
-            { t:"Regional Gaps", body:"Perbedaan antardaerah & implikasi kebijakan."}
+            { t:"University Graduates by Education and Occupation in STEM, 2024 (Source: Sakernas, BPS)", raw:true, body: OVERVIEW_EDUNOCUP_HTML, csvEdunocup:true },
           ]
         };
 
@@ -940,6 +970,14 @@ card_html = """
             if (it.csvDisability) {
               btns.push(`
                 <a href="${CSV_DISABILITY_URL}" download="${CSV_DISABILITY_FILENAME}"
+                  class="btn-flat waves-effect download-btn"
+                  title="Download CSV" onclick="event.stopPropagation();">
+                  <i class="material-icons">download</i>
+                </a>`);
+            }
+            if (it.csvEdunocup) {
+              btns.push(`
+                <a href="${CSV_EDUNOCUP_URL}" download="${CSV_EDUNOCUP_FILENAME}"
                   class="btn-flat waves-effect download-btn"
                   title="Download CSV" onclick="event.stopPropagation();">
                   <i class="material-icons">download</i>
@@ -1255,6 +1293,11 @@ card_html = card_html.replace("__CSV_AGE_FILENAME__", csv_filename_age)
 card_html = card_html.replace("__OVERVIEW_DISABILITY_HTML__", overview_html_disability_js)
 card_html = card_html.replace("__CSV_DISABILITY_DATA__", overview_csv_disability_js)
 card_html = card_html.replace("__CSV_DISABILITY_FILENAME__", csv_filename_disability)
+
+
+card_html = card_html.replace("__OVERVIEW_EDUNOCUP_HTML__", overview_html_edunocup_js)
+card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
+card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
 
 components.html(card_html, height=0, scrolling=False)
 

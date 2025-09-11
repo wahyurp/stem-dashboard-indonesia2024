@@ -1283,91 +1283,29 @@ card_html = """
           });
         });
 
-        const GEOJSON = __GEOJSON__;
-        const MAPDATA_RAW = __MAPDATA__;
-        const getProvinceKey = (gj) => {
-          const p0 = gj?.features?.[0]?.properties || {};
-          return ('Provinsi' in p0) ? 'Provinsi'
-              : ('Propinsi' in p0) ? 'Propinsi'
-              : Object.keys(p0)[0];
-        };
+        const GEOJSON = __GEOJSON__;        // token diganti dari Python
+        const MAPDATA = __MAPDATA__;        // token diganti dari Python
+        (function(){
+          try {
+            const names = new Set(GEOJSON.features.map(f => String(f.properties.Propinsi).trim().toUpperCase()));
+            const miss = (MAPDATA.locations || []).filter(n => !names.has(String(n).trim().toUpperCase()));
+            if (miss.length) {
+              console.log('Unmatched locations:', miss);
+            }
+          } catch(e) { console.warn(e); }
+        })();
+        Plotly.newPlot("choropleth", [{
+          type: "choropleth",
+          geojson: GEOJSON,
+          featureidkey: "properties.Propinsi",
+          locations: MAPDATA.locations,
+          z: MAPDATA.values,
+          colorscale: "Blues",
+          marker: { line: { color: "black", width: 0.5 } },
+          colorbar: { title: "STEM Graduates" }
+        }], { geo:{fitbounds:"locations", visible:false}, margin:{t:0,r:0,b:0,l:0}, height:500 }, {responsive:true})
+        .then(() => setHeight());  // panggil setHeight() yang sudah ada di iframe 1
 
-        // Kembalikan array unik nama provinsi dari GeoJSON
-        const getProvinceNames = (gj) => {
-          const key = getProvinceKey(gj);
-          return [...new Set((gj.features || []).map(f => String(f.properties[key]).trim()))];
-        };
-
-        // === PANGGIL & LOG ===
-        const provNames = getProvinceNames(GEOJSON); // ganti GEOJSON kalau variabel kamu beda
-        console.log('Jumlah provinsi:', provNames.length);
-        console.log('Nama-nama provinsi:', provNames);
-
-        // (Opsional) tampilkan tabel dengan versi kanonik untuk bantu debug pencocokan
-        var canon = s => String(s)
-          .normalize('NFKD')
-          .replace(/[.\s\u00A0\-–—_/]/g, '')
-          .toUpperCase();
-
-        console.table(provNames.map((n,i) => ({
-          no: i + 1,
-          nama: n,
-          kanonik: canon(n)
-        })));
-        // 1) Deteksi key properti di GeoJSON (Provinsi vs Propinsi)
-        const props0 = GEOJSON?.features?.[0]?.properties || {};
-        const FEATURE_KEY = ('Provinsi' in props0) ? 'Provinsi'
-                          : ('Propinsi' in props0) ? 'Propinsi'
-                          : Object.keys(props0)[0];
-
-        // 2) Fungsi kanonisasi: buang spasi/titik/strip, uppercase.
-        //    Ini bikin "DI. ACEH" == "ACEH" == "Di Aceh" == "di-aceh".
-        var canon = s => String(s ?? '')
-          .normalize('NFKD')
-          .replace(/[.\s\u00A0\-–—_/]/g, '')  // spasi, non-break, strip variasi
-          .toUpperCase().trim();
-
-        // 3) Buat peta dari bentuk kanonik -> nama persis di GeoJSON
-        const geoNameMap = new Map(
-          (GEOJSON.features || []).map(f => {
-            const raw = f.properties[FEATURE_KEY];
-            return [canon(raw), String(raw)];
-          })
-        );
-
-        // 4) Ubah locations dari data menjadi nama persis yang ada di GeoJSON
-        const locationsCanon  = (MAPDATA_RAW.locations || []).map(canon);
-        const locationsFixed  = locationsCanon.map(k => geoNameMap.get(k));
-
-        // Debug ringan (kalau masih ada yang gagal akan terlihat “null”)
-        const misses = locationsFixed.reduce((a,n,i)=> (n? a : a.concat(MAPDATA_RAW.locations[i])), []);
-        if (misses.length) console.warn('Masih tidak ketemu:', misses);
-
-        // 5) Pastikan z numerik
-        const values = (MAPDATA_RAW.values || []).map(v => +v);
-
-        // 6) Render setelah Plotly siap
-        (function whenPlotlyReady(cb){
-          if (window.Plotly) return cb();
-          const t = setInterval(()=>{ if (window.Plotly){ clearInterval(t); cb(); }}, 50);
-        })(function(){
-          Plotly.newPlot(
-            "choropleth",
-            [{
-              type: "choropleth",
-              geojson: GEOJSON,
-              featureidkey: `properties.${FEATURE_KEY}`,
-              locations: locationsFixed,   // nama PERSIS dari GeoJSON
-              z: values,
-              colorscale: "Blues",
-              marker: { line: { color: "white", width: 0.5 } },
-              colorbar: { title: "STEM Graduates" }
-            }],
-            { geo: { fitbounds: "locations", visible: false },
-              margin: { t: 0, r: 0, b: 0, l: 0 }, height: 500 },
-            { responsive: true }
-          ).then(() => setHeight());
-        });
         CLOSE_BTN.addEventListener('click', function(){
           CLOSE_BAR.classList.remove('show');
           fadeOut(LIST, function(){ LIST.innerHTML = ""; setHeight(); });
@@ -1416,32 +1354,23 @@ card_html = card_html.replace("__OVERVIEW_EDUNOCUP_HTML__", overview_html_edunoc
 card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
 # siapkan token
-# --- siapkan data untuk MAPDATA (lebih tahan salah tulis) ---
 df_js = df_edunocup[["Province", "STEM Graduates in STEM Jobs"]].copy()
-alias_py = {
-    "Aceh": "DI. ACEH",
-    "D I Yogyakarta": "DAERAH ISTIMEWA YOGYAKARTA",
+if df_js['Province'].iloc[-1].strip().casefold() == 'indonesia':
+    df_js = df_js.iloc[:-1]
+df_js["Province"] = df_js["Province"].replace(province_name_mapping)
+
+data_dict = {
+    "locations": df_js["Province"].tolist(),
+    "values": df_js["STEM Graduates in STEM Jobs"].tolist()
 }
-df_js["Province"] = df_js["Province"].replace(alias_py)
 
-
-# buang baris agregat nasional jika ada
-df_js = df_js[df_js["Province"].str.strip().str.upper() != "INDONESIA"].copy()
-
-# pastikan nilai numerik (jika ada string/blank akan jadi NaN)
-df_js["STEM Graduates in STEM Jobs"] = pd.to_numeric(
-    df_js["STEM Graduates in STEM Jobs"], errors="coerce"
-)
-
-# kirim ‘apa adanya’ (jangan paksa ke DI. ACEH dst — nanti dirapikan di JS)
-
-vals = pd.to_numeric(df_js["STEM Graduates in STEM Jobs"], errors="coerce")
+geojson_str = json.dumps(indonesia_geojson, ensure_ascii=False)
 data_map = {
-    "locations": df_js["Province"].astype(str).tolist(),
-    "values": vals.where(pd.notna(vals), None).tolist(),  # bukan fillna(None)
+    "locations": df_js["Province"].tolist(),  # atau langsung dari df_edunocup dengan mapping
+    "values": df_js["STEM Graduates in STEM Jobs"].tolist()
 }
-
+card_html = card_html.replace("__GEOJSON__", geojson_str)
 card_html = card_html.replace("__MAPDATA__", json.dumps(data_map, ensure_ascii=False))
-card_html = card_html.replace("__GEOJSON__", json.dumps(indonesia_geojson, ensure_ascii=False))
+
 # render SATU komponen saja:
-components.html(card_html, height=1500, scrolling=False)
+components.html(card_html, height=560, scrolling=False)

@@ -1329,7 +1329,11 @@ card_html = """
 
           // 7) Pastikan z numerik/null
           const z = (MAPDATA.values || []).map(v => (v==null || v==='') ? null : +v);
-
+          const SCALE_BLUE = [
+            [0, "#ffffff"],
+            [0.6, "#b8d7f2"],
+            [1, "#3498db"]
+          ];
           // 8) Render
           Plotly.newPlot("choropleth", [{
             type: "choropleth",
@@ -1337,7 +1341,7 @@ card_html = """
             featureidkey: `properties.${FEATURE_KEY}`,
             locations: locationsFixed,
             z,
-            colorscale: "Blues",
+            colorscale: SCALE_BLUE,
             marker: { line: { color: "white", width: 0.5 } },
             colorbar: { title: "STEM Graduates" }
           }], {

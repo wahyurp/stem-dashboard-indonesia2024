@@ -742,6 +742,7 @@ card_html = """
           <div style="background-color:#f0f0f0; padding:20px; border-radius:10px;
               box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
               font-size:18px; font-style:italic; color:#333;
+              margin-bottom:90px;
               width:80%; margin:40px auto; text-align:center;">
               “In 2024, the distribution of STEM graduates in Indonesia shows that the largest shares are concentrated in provinces like <b>Jawa Barat (16.73%)</b> and <b>Jawa Timur (12.99%)</b>, reflecting the dominance of Java as the country’s STEM hub. Male and female shares are relatively balanced with provincial differences. ”
           </div>

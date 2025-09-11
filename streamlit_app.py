@@ -1283,28 +1283,66 @@ card_html = """
           });
         });
 
-        const GEOJSON = __GEOJSON__;        // token diganti dari Python
-        const MAPDATA = __MAPDATA__;        // token diganti dari Python
-        (function(){
-          try {
-            const names = new Set(GEOJSON.features.map(f => String(f.properties.Propinsi).trim().toUpperCase()));
-            const miss = (MAPDATA.locations || []).filter(n => !names.has(String(n).trim().toUpperCase()));
-            if (miss.length) {
-              console.log('Unmatched locations:', miss);
-            }
-          } catch(e) { console.warn(e); }
-        })();
-        Plotly.newPlot("choropleth", [{
-          type: "choropleth",
-          geojson: GEOJSON,
-          featureidkey: "properties.Propinsi",
-          locations: MAPDATA.locations,
-          z: MAPDATA.values,
-          colorscale: "Blues",
-          marker: { line: { color: "black", width: 0.5 } },
-          colorbar: { title: "STEM Graduates" }
-        }], { geo:{fitbounds:"locations", visible:false}, margin:{t:0,r:0,b:0,l:0}, height:500 }, {responsive:true})
-        .then(() => setHeight());  // panggil setHeight() yang sudah ada di iframe 1
+          const GEOJSON = __GEOJSON__;
+          const MAPDATA = __MAPDATA__;
+
+          // 1) Deteksi nama properti yang benar
+          const props0 = GEOJSON?.features?.[0]?.properties || {};
+          const FEATURE_KEY = ('Provinsi' in props0) ? 'Provinsi'
+                          : ('Propinsi' in props0) ? 'Propinsi'
+                          : Object.keys(props0)[0];
+
+          // 2) Fungsi kanonisasi untuk match nama fleksibel
+          const canon = s => String(s ?? '')
+            .normalize('NFKD')
+            .replace(/[.\s\u00A0\-–—_/]/g, '')
+            .toUpperCase();
+
+          // 3) Peta kanonik -> nama persis di GeoJSON
+          const geoNameMap = new Map(
+            (GEOJSON.features || []).map(f => {
+              const raw = f.properties[FEATURE_KEY];
+              return [canon(raw), String(raw)];
+            })
+          );
+
+          // 4) Alias bandel (Aceh & DIY)
+          const ALIAS = new Map([
+            ['ACEH','DI. ACEH'],
+            ['DIYOGYAKARTA','DAERAH ISTIMEWA YOGYAKARTA'],
+            ['DAERAHISTIMEWAYOGYAKARTA','DAERAH ISTIMEWA YOGYAKARTA'],
+          ]);
+
+          // 5) Bangun locations yang benar-benar ada di GeoJSON
+          const locationsFixed = (MAPDATA.locations || []).map(src => {
+            const c = canon(src);
+            return geoNameMap.get(c) || ALIAS.get(c) || null;
+          });
+
+          // 6) Debug yang masih miss
+          const misses = [];
+          locationsFixed.forEach((v,i)=>{ if(!v) misses.push(MAPDATA.locations[i]); });
+          console.warn('Masih tidak ketemu:', misses.length ? misses : '—');
+          console.table((MAPDATA.locations||[]).map((src,i)=>({src, mapped: locationsFixed[i]})));
+
+          // 7) Pastikan z numerik/null
+          const z = (MAPDATA.values || []).map(v => (v==null || v==='') ? null : +v);
+
+          // 8) Render
+          Plotly.newPlot("choropleth", [{
+            type: "choropleth",
+            geojson: GEOJSON,
+            featureidkey: `properties.${FEATURE_KEY}`,
+            locations: locationsFixed,
+            z,
+            colorscale: "Blues",
+            marker: { line: { color: "white", width: 0.5 } },
+            colorbar: { title: "STEM Graduates" }
+          }], {
+            geo: { fitbounds: "geojson", visible: false },
+            margin: { t:0, r:0, b:0, l:0 },
+            height: 500
+          }, { responsive: true }).then(() => setHeight());
 
         CLOSE_BTN.addEventListener('click', function(){
           CLOSE_BAR.classList.remove('show');
@@ -1373,4 +1411,4 @@ card_html = card_html.replace("__GEOJSON__", geojson_str)
 card_html = card_html.replace("__MAPDATA__", json.dumps(data_map, ensure_ascii=False))
 
 # render SATU komponen saja:
-components.html(card_html, height=560, scrolling=False)
+components.html(card_html, height=700, scrolling=True)

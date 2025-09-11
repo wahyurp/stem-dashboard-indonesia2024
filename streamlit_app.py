@@ -918,14 +918,14 @@ card_html = """
         };
 
         /* ==== Auto-resize iframe (lebih kuat) ==== */
+        const ROOT = document.getElementById('wrap') || document.body;
+
         function setHeight(){
-          // ukur tinggi konten sebenarnya (wrap adalah kontainer utama kartu)
-          const target = document.getElementById('wrap') || document.body;
           const h = Math.ceil(
             Math.max(
-              target.scrollHeight,
-              target.offsetHeight,
-              target.getBoundingClientRect().height
+              ROOT.scrollHeight,
+              ROOT.offsetHeight,
+              ROOT.getBoundingClientRect().height
             )
           ) + 4;
 
@@ -937,12 +937,22 @@ card_html = """
           if (window.frameElement) window.frameElement.style.height = h + "px";
         }
 
-        // panggil agresif di awal supaya tidak kalah cepat oleh iframe berikutnya
-        let ticks = 0;
-        const iv = setInterval(() => { setHeight(); if (++ticks > 20) clearInterval(iv); }, 80);
-        new ResizeObserver(setHeight).observe(document.body);
+        // Kick awal agresif (cegah “kalah start” sama iframe peta)
+        let n = 0;
+        const iv = setInterval(() => { setHeight(); if (++n > 20) clearInterval(iv); }, 80);
+
+        // Resize saat ukuran ROOT berubah
+        new ResizeObserver(setHeight).observe(ROOT);
+
+        // Pantau perubahan DOM (buka/tutup collapsible, ganti konten, dll)
+        new MutationObserver(setHeight).observe(ROOT, {
+          childList: true, subtree: true, attributes: true
+        });
+
         window.addEventListener("load", setHeight);
         document.fonts && document.fonts.ready && document.fonts.ready.then(setHeight);
+        setTimeout(setHeight, 400);
+        setTimeout(setHeight, 1200);
 
         /* ==== Fade helpers ==== */
         function fadeOut(el, after){

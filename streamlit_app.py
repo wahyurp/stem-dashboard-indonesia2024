@@ -1337,20 +1337,31 @@ card_html = """
           const z = (MAPDATA.values || []).map(v => (v==null || v==='') ? null : +v);
           const SCALE_BLUE = [[0, "#b8d7f2"], [1, "#3498db"]];
           // 8) Render
-          Plotly.newPlot("choropleth", [{
-            type: "choropleth",
-            geojson: GEOJSON,
-            featureidkey: `properties.${FEATURE_KEY}`,
-            locations: locationsFixed,
-            z,
-            colorscale: SCALE_BLUE,
-            marker: { line: { color: "white", width: 0.5 } },
-            colorbar: { title: "STEM Graduates" }
-          }], {
-            geo: { fitbounds: "geojson", visible: false },
-            margin: { t:0, r:0, b:0, l:0 },
-            height: 500
-          }, { responsive: true }).then(() => setHeight());
+          Plotly.newPlot(
+            "choropleth",
+            [{
+              type: "choropleth",
+              geojson: GEOJSON,
+              featureidkey: `properties.${FEATURE_KEY}`,
+              locations: locationsFixed,
+              z,
+              colorscale: SCALE_BLUE,
+              marker: { line: { color: "white", width: 0.5 } },
+              colorbar: { title: "STEM Graduates" },
+
+              // 👇 bikin format tooltip sendiri dan hilangkan “trace name”
+              hovertemplate: "<b>%{location}</b><br>Share in STEM jobs: %{z:.2f}%<extra></extra>"
+            }],
+            {
+              geo: { fitbounds: "geojson", visible: false },
+              margin: { t:0, r:0, b:0, l:0 },
+              height: 500,
+
+              // 👇 jangan potong nama (no ellipsis)
+              hoverlabel: { namelength: -1 }
+            },
+            { responsive: true }
+          ).then(() => setHeight());
 
         CLOSE_BTN.addEventListener('click', function(){
           CLOSE_BAR.classList.remove('show');

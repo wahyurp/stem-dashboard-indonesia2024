@@ -737,6 +737,7 @@ card_html = """
           </div>
         </div>
         <div class="content-wrap" style="margin-top:24px">
+         <div class="title-text blue-text" id="topic-title">Map STEM Graduates</div>
           <div id="choropleth" style="width:100%;height:500px;"></div>
         </div>
       </div>

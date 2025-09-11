@@ -1331,7 +1331,7 @@ card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
 
 # sebelumnya: components.html(card_html, height=1, scrolling=False)
-components.html(card_html, height=800, scrolling=False)  # tinggi awal aman
+components.html(card_html, height=500, scrolling=False)  # tinggi awal aman
 
 st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
 

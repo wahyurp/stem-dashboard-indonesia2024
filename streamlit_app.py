@@ -1285,7 +1285,35 @@ card_html = """
 
         const GEOJSON = __GEOJSON__;
         const MAPDATA_RAW = __MAPDATA__;
+        const getProvinceKey = (gj) => {
+          const p0 = gj?.features?.[0]?.properties || {};
+          return ('Provinsi' in p0) ? 'Provinsi'
+              : ('Propinsi' in p0) ? 'Propinsi'
+              : Object.keys(p0)[0];
+        };
 
+        // Kembalikan array unik nama provinsi dari GeoJSON
+        const getProvinceNames = (gj) => {
+          const key = getProvinceKey(gj);
+          return [...new Set((gj.features || []).map(f => String(f.properties[key]).trim()))];
+        };
+
+        // === PANGGIL & LOG ===
+        const provNames = getProvinceNames(GEOJSON); // ganti GEOJSON kalau variabel kamu beda
+        console.log('Jumlah provinsi:', provNames.length);
+        console.log('Nama-nama provinsi:', provNames);
+
+        // (Opsional) tampilkan tabel dengan versi kanonik untuk bantu debug pencocokan
+        const canon = s => String(s)
+          .normalize('NFKD')
+          .replace(/[.\s\u00A0\-–—_/]/g, '')
+          .toUpperCase();
+
+        console.table(provNames.map((n,i) => ({
+          no: i + 1,
+          nama: n,
+          kanonik: canon(n)
+        })));
         // 1) Deteksi key properti di GeoJSON (Provinsi vs Propinsi)
         const props0 = GEOJSON?.features?.[0]?.properties || {};
         const FEATURE_KEY = ('Provinsi' in props0) ? 'Provinsi'

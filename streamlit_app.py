@@ -1411,4 +1411,4 @@ card_html = card_html.replace("__GEOJSON__", geojson_str)
 card_html = card_html.replace("__MAPDATA__", json.dumps(data_map, ensure_ascii=False))
 
 # render SATU komponen saja:
-components.html(card_html, height=700, scrolling=True)
+components.html(card_html, height=2000, scrolling=False)

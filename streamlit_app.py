@@ -1282,7 +1282,7 @@ card_html = """
             if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleCard(card); }
           });
         });
-        
+
         const GEOJSON = __GEOJSON__;        // token diganti dari Python
         const MAPDATA = __MAPDATA__;        // token diganti dari Python
 
@@ -1297,7 +1297,6 @@ card_html = """
           colorbar: { title: "STEM Graduates" }
         }], { geo:{fitbounds:"locations", visible:false}, margin:{t:0,r:0,b:0,l:0}, height:500 }, {responsive:true})
         .then(() => setHeight());  // panggil setHeight() yang sudah ada di iframe 1
-      </script>
 
         CLOSE_BTN.addEventListener('click', function(){
           CLOSE_BAR.classList.remove('show');

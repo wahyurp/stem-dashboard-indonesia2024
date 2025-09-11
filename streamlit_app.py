@@ -1329,11 +1329,7 @@ card_html = """
 
           // 7) Pastikan z numerik/null
           const z = (MAPDATA.values || []).map(v => (v==null || v==='') ? null : +v);
-          const SCALE_BLUE = [
-            [0, "#ffffff"],
-            [0.6, "#b8d7f2"],
-            [1, "#3498db"]
-          ];
+          const SCALE_BLUE = [[0, "#ffffff"], [1, "#3498db"]];
           // 8) Render
           Plotly.newPlot("choropleth", [{
             type: "choropleth",

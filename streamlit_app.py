@@ -945,7 +945,7 @@ card_html = """
           document.fonts && document.fonts.ready && document.fonts.ready.then(setHeight);
           setTimeout(setHeight, 400);  // jaga-jaga untuk asset eksternal
           setTimeout(setHeight, 1200); // jaga-jaga lagi saat lottie/plotly selesai
-        })();
+
         /* ==== Fade helpers ==== */
         function fadeOut(el, after){
           if(!el) return after && after();

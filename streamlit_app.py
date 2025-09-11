@@ -1310,11 +1310,16 @@ card_html = card_html.replace("__OVERVIEW_EDUNOCUP_HTML__", overview_html_edunoc
 card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
 
-components.html(card_html, height=0, scrolling=False)
+components.html(card_html, height=300, scrolling=False)
 
 
+##======== SEGMEN 3 ========
+l2, center2, r2 = st.columns([1, 10, 1], gap="small")
 
-
+with center2:
+    st.markdown('<div class="title-text" style="text-align:center; margin-top:5%">Map STEM Graduates</div>', unsafe_allow_html=True)
+    fig = make_choropleth(df_edunocup, "Province", "STEM Graduates in STEM Jobs", "Blues")
+    st.plotly_chart(fig, use_container_width=True)
 
 
 

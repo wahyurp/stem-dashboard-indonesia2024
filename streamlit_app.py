@@ -1390,6 +1390,12 @@ card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup
 # siapkan token
 # --- siapkan data untuk MAPDATA (lebih tahan salah tulis) ---
 df_js = df_edunocup[["Province", "STEM Graduates in STEM Jobs"]].copy()
+alias_py = {
+    "Aceh": "DI. ACEH",
+    "D I Yogyakarta": "DAERAH ISTIMEWA YOGYAKARTA",
+}
+df_js["Province"] = df_js["Province"].replace(alias_py)
+
 
 # buang baris agregat nasional jika ada
 df_js = df_js[df_js["Province"].str.strip().str.upper() != "INDONESIA"].copy()
@@ -1400,11 +1406,11 @@ df_js["STEM Graduates in STEM Jobs"] = pd.to_numeric(
 )
 
 # kirim ‘apa adanya’ (jangan paksa ke DI. ACEH dst — nanti dirapikan di JS)
-vals = df_js["STEM Graduates in STEM Jobs"]
 
+vals = pd.to_numeric(df_js["STEM Graduates in STEM Jobs"], errors="coerce")
 data_map = {
     "locations": df_js["Province"].astype(str).tolist(),
-    "values": vals.where(pd.notna(vals), None).tolist()   # ⬅️ ganti baris ini
+    "values": vals.where(pd.notna(vals), None).tolist(),  # bukan fillna(None)
 }
 
 card_html = card_html.replace("__MAPDATA__", json.dumps(data_map, ensure_ascii=False))

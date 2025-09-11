@@ -738,11 +738,13 @@ card_html = """
         </div>
       </div>
     </div>
-
+    <div class="content-wrap" style="margin-top:24px">
+      <div id="choropleth" style="width:100%;height:500px;"></div>
+    </div>
     <!-- Materialize JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
-
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
     <script>
       (function(){
         const OVERVIEW_HTML = `__OVERVIEW_HTML__`;
@@ -1281,6 +1283,22 @@ card_html = """
             if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleCard(card); }
           });
         });
+        <script>
+        const GEOJSON = __GEOJSON__;        // token diganti dari Python
+        const MAPDATA = __MAPDATA__;        // token diganti dari Python
+
+        Plotly.newPlot("choropleth", [{
+          type: "choropleth",
+          geojson: GEOJSON,
+          featureidkey: "properties.Propinsi",
+          locations: MAPDATA.locations,
+          z: MAPDATA.values,
+          colorscale: "Blues",
+          marker: { line: { color: "black", width: 0.5 } },
+          colorbar: { title: "STEM Graduates" }
+        }], { geo:{fitbounds:"locations", visible:false}, margin:{t:0,r:0,b:0,l:0}, height:500 }, {responsive:true})
+        .then(() => setHeight());  // panggil setHeight() yang sudah ada di iframe 1
+      </script>
 
         CLOSE_BTN.addEventListener('click', function(){
           CLOSE_BAR.classList.remove('show');
@@ -1329,18 +1347,7 @@ card_html = card_html.replace("__CSV_DISABILITY_FILENAME__", csv_filename_disabi
 card_html = card_html.replace("__OVERVIEW_EDUNOCUP_HTML__", overview_html_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
-
-# sebelumnya: components.html(card_html, height=1, scrolling=False)
-components.html(card_html, height=500, scrolling=False)  # tinggi awal aman
-
-st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
-
-
-##======== SEGMEN 3 ========
-
-with open("indonesia-prov-clean.geojson", "r", encoding="utf-8") as f:
-    indonesia_geojson = json.load(f)
-
+# siapkan token
 df_js = df_edunocup[["Province", "STEM Graduates in STEM Jobs"]].copy()
 df_js["Province"] = df_js["Province"].replace(province_name_mapping)
 
@@ -1349,94 +1356,13 @@ data_dict = {
     "values": df_js["STEM Graduates in STEM Jobs"].tolist()
 }
 
-# 2. Serialisasi ke JS string
 geojson_str = json.dumps(indonesia_geojson, ensure_ascii=False)
-data_str = json.dumps(data_dict, ensure_ascii=False)
+data_map = {
+    "locations": df_js["Province"].tolist(),  # atau langsung dari df_edunocup dengan mapping
+    "values": df_js["STEM Graduates in STEM Jobs"].tolist()
+}
+card_html = card_html.replace("__GEOJSON__", geojson_str)
+card_html = card_html.replace("__MAPDATA__", json.dumps(data_map, ensure_ascii=False))
 
-# 3. Inject ke komponen HTML
-components.html(f"""
-<div id="choropleth" style="width:100%;height:500px;"></div>
-<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
-<script>
-  const geojson = {geojson_str};
-  const dataMap = {data_str};
-
-  var trace = {{
-    type: "choropleth",
-    locationmode: "geojson-id",
-    geojson: geojson,
-    featureidkey: "properties.Propinsi",
-    locations: dataMap.locations,
-    z: dataMap.values,
-    colorscale: "Blues",
-    marker: {{ line: {{ color: "black", width: 0.5 }} }},
-    colorbar: {{ title: "STEM Graduates" }}
-  }};
-
-  var layout = {{
-    geo: {{ fitbounds: "locations", visible: false }},
-    margin: {{ t:0, r:0, l:0, b:0 }},
-    paper_bgcolor: "white",
-    height: 500
-  }};
-
-  Plotly.newPlot("choropleth", [trace], layout, {{responsive: true}})
-    .then(function(){{ setHeight(); }});
-
-  /* ====== AUTO-RESIZE IFRAME STREAMLIT ====== */
-  function setHeight(){{
-    try {{
-      var h = Math.max(
-        document.documentElement.scrollHeight,
-        document.body.scrollHeight,
-        document.documentElement.offsetHeight
-      ) + 2;
-
-      if (window.Streamlit && window.Streamlit.setFrameHeight) {{
-        window.Streamlit.setFrameHeight(h);
-      }} else if (window.parent && window.parent.postMessage) {{
-        window.parent.postMessage({{ type: "streamlit:setFrameHeight", height: h }}, "*");
-      }}
-      if (window.frameElement) {{
-        window.frameElement.style.height = h + "px";
-      }}
-    }} catch(e) {{}}
-  }}
-
-  // panggil saat layout berubah
-  new ResizeObserver(setHeight).observe(document.body);
-  window.addEventListener("load", setHeight);
-  window.addEventListener("resize", setHeight);
-  document.fonts && document.fonts.ready && document.fonts.ready.then(setHeight);
-  setTimeout(setHeight, 400);
-  setTimeout(setHeight, 1200);
-
-  // panggil lagi saat Plotly selesai render/relayout
-  var el = document.getElementById("choropleth");
-  if (el && el.on) {{
-    el.on("plotly_afterplot", setHeight);
-    el.on("plotly_relayout", setHeight);
-  }}
-</script>
-""", height=1, scrolling=False)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # Segmen full-bleed: diletakkan tanpa wrapper .content-wrap
-# card_html = card_html.replace("__OVERVIEW_HTML__", overview_html_js)
-# card_html = card_html.replace("__CSV_DATA__", overview_csv_js)
-# card_html = card_html.replace("__CSV_FILENAME__", csv_filename_sex)
-
-# components.html(card_html, height=0, scrolling=False)
+# render SATU komponen saja:
+components.html(card_html, height=560, scrolling=False)

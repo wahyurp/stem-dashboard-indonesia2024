@@ -1285,7 +1285,15 @@ card_html = """
 
         const GEOJSON = __GEOJSON__;        // token diganti dari Python
         const MAPDATA = __MAPDATA__;        // token diganti dari Python
-
+        (function(){
+          try {
+            const names = new Set(GEOJSON.features.map(f => String(f.properties.Propinsi).trim().toUpperCase()));
+            const miss = (MAPDATA.locations || []).filter(n => !names.has(String(n).trim().toUpperCase()));
+            if (miss.length) {
+              console.log('Unmatched locations:', miss);
+            }
+          } catch(e) { console.warn(e); }
+        })();
         Plotly.newPlot("choropleth", [{
           type: "choropleth",
           geojson: GEOJSON,

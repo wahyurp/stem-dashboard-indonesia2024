@@ -1025,7 +1025,6 @@ card_html = """
             }
             const downloads = btns.join('');
 
-            // Body
             const bodyHtml = it.raw
               ? (it.nowrap ? it.body : `<div class="table-wrap">${it.body}</div>`)
               : `<span>${it.body || ""}</span>`;
@@ -1061,16 +1060,16 @@ card_html = """
             const t = document.getElementById(tableId);
             if (!t) { if (debug) console.warn('Table not found:', tableId); return; }
 
-            // normalisasi teks (rapikan spasi; opsional lowercasing)
+
             const normalize = s => s.replace(/\s+/g, ' ').trim();
             const norm = s => caseSensitive ? normalize(s) : normalize(s).toLowerCase();
 
-            // ambil sel header (thead kalau ada, fallback ke baris pertama)
+
             const headRow = t.tHead ? t.tHead.rows[0] : t.rows[0];
             if (!headRow) { if (debug) console.warn('No header row in table:', tableId); return; }
             const headCells = Array.from(headRow.cells);
 
-            // tentukan indeks kolom target berdasarkan headers
+
             let headerIdxs = [];
             if (exact) {
               const headerSet = new Set(headers.map(norm));
@@ -1182,7 +1181,7 @@ card_html = """
 
         const SANKEY_MAP = __SANKEY_MAP__;
 
-        // ====== Utilitas konversi ke format Plotly ======
+
         function sankeyToPlotly(data) {
           // data: [["source","target",value], ...]
           const nodes = [...new Set(data.flatMap(([s,t,_]) => [s,t]))];
@@ -1294,19 +1293,19 @@ card_html = """
           const GEOJSON = __GEOJSON__;
           const MAPDATA = __MAPDATA__;
 
-          // 1) Deteksi nama properti yang benar
+
           const props0 = GEOJSON?.features?.[0]?.properties || {};
           const FEATURE_KEY = ('Provinsi' in props0) ? 'Provinsi'
                           : ('Propinsi' in props0) ? 'Propinsi'
                           : Object.keys(props0)[0];
 
-          // 2) Fungsi kanonisasi untuk match nama fleksibel
+
           const canon = s => String(s ?? '')
             .normalize('NFKD')
             .replace(/[.\s\u00A0\-–—_/]/g, '')
             .toUpperCase();
 
-          // 3) Peta kanonik -> nama persis di GeoJSON
+
           const geoNameMap = new Map(
             (GEOJSON.features || []).map(f => {
               const raw = f.properties[FEATURE_KEY];
@@ -1314,29 +1313,28 @@ card_html = """
             })
           );
 
-          // 4) Alias bandel (Aceh & DIY)
+
           const ALIAS = new Map([
             ['ACEH','DI. ACEH'],
             ['DIYOGYAKARTA','DAERAH ISTIMEWA YOGYAKARTA'],
             ['DAERAHISTIMEWAYOGYAKARTA','DAERAH ISTIMEWA YOGYAKARTA'],
           ]);
 
-          // 5) Bangun locations yang benar-benar ada di GeoJSON
           const locationsFixed = (MAPDATA.locations || []).map(src => {
             const c = canon(src);
             return geoNameMap.get(c) || ALIAS.get(c) || null;
           });
 
-          // 6) Debug yang masih miss
+
           const misses = [];
           locationsFixed.forEach((v,i)=>{ if(!v) misses.push(MAPDATA.locations[i]); });
           console.warn('Masih tidak ketemu:', misses.length ? misses : '—');
           console.table((MAPDATA.locations||[]).map((src,i)=>({src, mapped: locationsFixed[i]})));
 
-          // 7) Pastikan z numerik/null
+
           const z = (MAPDATA.values || []).map(v => (v==null || v==='') ? null : +v);
           const SCALE_BLUE = [[0, "#b8d7f2"], [1, "#3498db"]];
-          // 8) Render
+
           Plotly.newPlot(
             "choropleth",
             [{
@@ -1349,7 +1347,6 @@ card_html = """
               marker: { line: { color: "white", width: 0.5 } },
               colorbar: { title: "STEM Graduates" },
 
-              // 👇 bikin format tooltip sendiri dan hilangkan “trace name”
               hovertemplate: "<b>%{location}</b><br>Share in STEM jobs: %{z:.2f}%<extra></extra>"
             }],
             {
@@ -1357,7 +1354,6 @@ card_html = """
               margin: { t:0, r:0, b:0, l:0 },
               height: 500,
 
-              // 👇 jangan potong nama (no ellipsis)
               hoverlabel: { namelength: -1 }
             },
             { responsive: true }

@@ -918,33 +918,31 @@ card_html = """
         };
 
         /* ==== Auto-resize iframe (lebih kuat) ==== */
-          function setHeight(){
-            var h = Math.max(
-              document.documentElement.scrollHeight,
-              document.body.scrollHeight,
-              document.documentElement.offsetHeight
-            ) + 2; // sedikit buffer
+        function setHeight(){
+          // ukur tinggi konten sebenarnya (wrap adalah kontainer utama kartu)
+          const target = document.getElementById('wrap') || document.body;
+          const h = Math.ceil(
+            Math.max(
+              target.scrollHeight,
+              target.offsetHeight,
+              target.getBoundingClientRect().height
+            )
+          ) + 4;
 
-            // 1) API resmi komponen Streamlit (jika tersedia)
-            if (window.Streamlit && window.Streamlit.setFrameHeight) {
-              window.Streamlit.setFrameHeight(h);
-            }
-            // 2) PostMessage (sebagian environment Cloud menangkap pesan ini)
-            else if (window.parent && window.parent.postMessage) {
-              window.parent.postMessage({ type: "streamlit:setFrameHeight", height: h }, "*");
-            }
-            // 3) Terakhir: setel langsung elemennya (kadang diblok di Cloud)
-            if (window.frameElement) {
-              window.frameElement.style.height = h + "px";
-            }
+          if (window.Streamlit && window.Streamlit.setFrameHeight) {
+            window.Streamlit.setFrameHeight(h);
+          } else if (window.parent && window.parent.postMessage) {
+            window.parent.postMessage({ type: "streamlit:setFrameHeight", height: h }, "*");
           }
+          if (window.frameElement) window.frameElement.style.height = h + "px";
+        }
 
-          // Recompute saat layout berubah
-          new ResizeObserver(setHeight).observe(document.body);
-          window.addEventListener("load", setHeight);
-          document.fonts && document.fonts.ready && document.fonts.ready.then(setHeight);
-          setTimeout(setHeight, 400);  // jaga-jaga untuk asset eksternal
-          setTimeout(setHeight, 1200); // jaga-jaga lagi saat lottie/plotly selesai
+        // panggil agresif di awal supaya tidak kalah cepat oleh iframe berikutnya
+        let ticks = 0;
+        const iv = setInterval(() => { setHeight(); if (++ticks > 20) clearInterval(iv); }, 80);
+        new ResizeObserver(setHeight).observe(document.body);
+        window.addEventListener("load", setHeight);
+        document.fonts && document.fonts.ready && document.fonts.ready.then(setHeight);
 
         /* ==== Fade helpers ==== */
         function fadeOut(el, after){
@@ -1322,7 +1320,10 @@ card_html = card_html.replace("__OVERVIEW_EDUNOCUP_HTML__", overview_html_edunoc
 card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
 
-components.html(card_html, height=1, scrolling=False)
+# sebelumnya: components.html(card_html, height=1, scrolling=False)
+components.html(card_html, height=1100, scrolling=False)  # tinggi awal aman
+
+st.markdown("<div style='height:24px'></div>", unsafe_allow_html=True)
 
 
 ##======== SEGMEN 3 ========

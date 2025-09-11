@@ -1388,23 +1388,24 @@ card_html = card_html.replace("__OVERVIEW_EDUNOCUP_HTML__", overview_html_edunoc
 card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
 # siapkan token
+# --- siapkan data untuk MAPDATA (lebih tahan salah tulis) ---
 df_js = df_edunocup[["Province", "STEM Graduates in STEM Jobs"]].copy()
-if df_js['Province'].iloc[-1].strip().casefold() == 'indonesia':
-    df_js = df_js.iloc[:-1]
-df_js["Province"] = df_js["Province"].replace(province_name_mapping)
 
-data_dict = {
-    "locations": df_js["Province"].tolist(),
-    "values": df_js["STEM Graduates in STEM Jobs"].tolist()
-}
+# buang baris agregat nasional jika ada
+df_js = df_js[df_js["Province"].str.strip().str.upper() != "INDONESIA"].copy()
 
-geojson_str = json.dumps(indonesia_geojson, ensure_ascii=False)
+# pastikan nilai numerik (jika ada string/blank akan jadi NaN)
+df_js["STEM Graduates in STEM Jobs"] = pd.to_numeric(
+    df_js["STEM Graduates in STEM Jobs"], errors="coerce"
+)
+
+# kirim ‘apa adanya’ (jangan paksa ke DI. ACEH dst — nanti dirapikan di JS)
 data_map = {
-    "locations": df_js["Province"].tolist(),  # atau langsung dari df_edunocup dengan mapping
-    "values": df_js["STEM Graduates in STEM Jobs"].tolist()
+    "locations": df_js["Province"].astype(str).tolist(),
+    "values": df_js["STEM Graduates in STEM Jobs"].fillna(None).tolist()
 }
-card_html = card_html.replace("__GEOJSON__", geojson_str)
-card_html = card_html.replace("__MAPDATA__", json.dumps(data_map, ensure_ascii=False))
 
+card_html = card_html.replace("__MAPDATA__", json.dumps(data_map, ensure_ascii=False))
+card_html = card_html.replace("__GEOJSON__", json.dumps(indonesia_geojson, ensure_ascii=False))
 # render SATU komponen saja:
 components.html(card_html, height=1500, scrolling=False)

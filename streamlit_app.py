@@ -1400,9 +1400,11 @@ df_js["STEM Graduates in STEM Jobs"] = pd.to_numeric(
 )
 
 # kirim ‘apa adanya’ (jangan paksa ke DI. ACEH dst — nanti dirapikan di JS)
+vals = df_js["STEM Graduates in STEM Jobs"]
+
 data_map = {
     "locations": df_js["Province"].astype(str).tolist(),
-    "values": df_js["STEM Graduates in STEM Jobs"].fillna(None).tolist()
+    "values": vals.where(pd.notna(vals), None).tolist()   # ⬅️ ganti baris ini
 }
 
 card_html = card_html.replace("__MAPDATA__", json.dumps(data_map, ensure_ascii=False))

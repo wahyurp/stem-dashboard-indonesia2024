@@ -57,11 +57,11 @@ st.markdown("""
 
 # --------------------- Data & Figures ---------------------
 data_total = [
-    ["University Graduates with a major in STEM fields", "Currently attending school and not engaged in any form of employment", 1.89],
-    ["University Graduates with a major in STEM fields", "Engaged in any form of employment", 79.39],
-    ["University Graduates with a major in STEM fields", "No longer attending school and not employed", 18.72],
-    ["Engaged in any form of employment", "STEM Jobs", 18.39],
-    ["Engaged in any form of employment", "Not in STEM Jobs", 61.00],
+    ["University Graduates with a major in STEM fields", "Currently attending school and not engaged in any form of employment", 0.80],
+    ["University Graduates with a major in STEM fields", "Engaged in any form of employment", 80.89],
+    ["University Graduates with a major in STEM fields", "No longer attending school and not employed", 18.31],
+    ["Engaged in any form of employment", "STEM Jobs", 27.77],
+    ["Engaged in any form of employment", "Not in STEM Jobs", 53.12],
 ]
 
 

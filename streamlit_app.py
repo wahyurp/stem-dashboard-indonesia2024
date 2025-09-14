@@ -614,27 +614,7 @@ card_html = """
         background-color: transparent !important;
       }
 
-      #sankey-panel { position: relative; }
-
-      #sankey-panel .input-field{
-        position: relative;
-        z-index: 1001;     /* pastikan di atas chart */
-        margin-bottom: 12px;
-      }
-
-      #sankey-chart{
-        position: relative;
-        z-index: 1;        /* chart di bawah input */
-      }
-
-      .select-dropdown.dropdown-content{
-        z-index: 2000 !important;
-      }
-
-      .input-field > label{
-        pointer-events: none;
-      }
-
+      
     </style>
   </head>
   <body>
@@ -1068,17 +1048,14 @@ card_html = """
           M.Collapsible.init(elems, {
             accordion: false,
             onOpenEnd: (el) => {
-                const holder = el.querySelector('#sankey-chart');
-                if (holder) {
-                  if (!sankeyReady) {
-                    setupSankey();
-                    sankeyReady = true;
-
-                    const sel = document.getElementById('sankey-filter');
-                    requestAnimationFrame(() => renderSankey(sel?.value || 'All'));
-                  } else {
-                    Plotly.Plots.resize(holder);
-                  }
+              // jika panel yang dibuka berisi sankey, render/resize di sini
+              const holder = el.querySelector('#sankey-chart');
+              if (holder) {
+                if (!sankeyReady) {
+                  setupSankey();      
+                  sankeyReady = true;
+                } else {
+                  Plotly.Plots.resize(holder);  
                 }
               }
               if (el.querySelector('#gen-table')) {
@@ -1168,6 +1145,7 @@ card_html = """
           Plotly.react(el, [trace], layout, {displayModeBar:false});
           requestAnimationFrame(setHeight);
         }
+
         function setupSankey(){
           const select = document.getElementById('sankey-filter');
           const el = document.getElementById('sankey-chart');
@@ -1175,37 +1153,22 @@ card_html = """
 
           M.FormSelect.init(select, {
             dropdownOptions: {
-              container: document.body,
+              container: document.body,   
               coverTrigger: false,
               constrainWidth: false,
               alignment: 'left',
               closeOnClick: true
             }
           });
-
-          // Safari helper (opsional)
-          select.addEventListener('mousedown', (e) => {
-            const ua = navigator.userAgent;
-            const isSafari = /Safari/i.test(ua) && !/Chrome|Chromium/i.test(ua);
-            if (isSafari) {
-              e.preventDefault(); e.stopPropagation();
-              const inst = M.FormSelect.getInstance(select);
-              inst && inst.dropdown && inst.dropdown.open();
-            }
-          });
-
+          
           setTimeout(() => {
             const inst = M.FormSelect.getInstance(select);
             inst && inst.dropdown && inst.dropdown.recalculateDimensions();
-
-            // >>> Render awal sankey (ini yang hilang)
-            requestAnimationFrame(() => {
-              renderSankey(select.value || 'All');
-            });
           }, 0);
+          renderSankey(select.value || 'All');
 
           select.addEventListener('change', (e) => {
-            e.stopPropagation();
+            e.stopPropagation();                
             renderSankey(e.target.value);
           });
 
@@ -1213,7 +1176,6 @@ card_html = """
           const ro = new ResizeObserver(() => Plotly.Plots.resize(el));
           ro.observe(el);
         }
-
         function clearActive(){
           cards.forEach(c => c.classList.remove('active'));
           activeId = null;

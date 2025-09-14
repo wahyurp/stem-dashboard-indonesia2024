@@ -7,7 +7,11 @@ import plotly.graph_objects as go
 import streamlit.components.v1 as components
 
 # --------------------- Page & Global CSS ---------------------
-st.set_page_config(layout="wide")
+st.set_page_config(
+    page_title="STEM Employment Data Dashboard 2024",
+    page_icon="🧪",
+    layout="wide",
+)
 st.markdown("""
 <style>
 .stApp { background: #ffffff !important; color: #111 !important; }

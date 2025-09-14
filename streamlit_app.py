@@ -614,21 +614,7 @@ card_html = """
         background-color: transparent !important;
       }
 
-      /* Native select khusus iOS Safari */
-        @supports (-webkit-touch-callout: none) {
-          #sankey-panel .input-field select.browser-default {
-            display: block !important;
-            width: 100%;
-            height: 44px;
-            padding: 8px 10px;
-            border: 1px solid #cfd8dc;
-            border-radius: 8px;
-            background: #fff;
-            -webkit-appearance: menulist;
-                    appearance: menulist;
-          }
-        }
-
+      
     </style>
   </head>
   <body>
@@ -1165,77 +1151,30 @@ card_html = """
           const el = document.getElementById('sankey-chart');
           if(!select || !el) return;
 
-          // Deteksi iPad/iOS Safari (termasuk iPadOS "MacIntel")
-          const ua = navigator.userAgent;
-          const isIOS = /iPad|iPhone|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-          const isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|CriOS/i.test(ua);
-          const onIOSSafari = isIOS && isSafari;
-
-          if (onIOSSafari) {
-            // === Fallback ke native select: stabil & bisa dipilih ===
-            select.classList.add('browser-default');
-
-            // Kalau sempat ter-init, hancurkan instance Materialize
-            const prev = M.FormSelect.getInstance(select);
-            if (prev) prev.destroy();
-
-            renderSankey(select.value || 'All');
-            select.addEventListener('change', (e) => {
-              e.stopPropagation();
-              renderSankey(e.target.value);
-              requestAnimationFrame(setHeight);
-            });
-            return; // selesai di mode iOS
-          }
-
-          // === Browser non-iOS: tetap gunakan Materialize Select ===
           M.FormSelect.init(select, {
             dropdownOptions: {
-              container: document.body,
+              container: document.body,   
               coverTrigger: false,
               constrainWidth: false,
               alignment: 'left',
-              closeOnClick: true,
-              onOpenStart: () => {
-                const inst = M.FormSelect.getInstance(select);
-                inst?.dropdown?.recalculateDimensions();
-                setHeight();
-              },
-              onOpenEnd: () => setHeight()
+              closeOnClick: true
             }
           });
-          const inst = M.FormSelect.getInstance(select);
-
-          // Bantu buka dropdown via input hasil transform Materialize (lebih halus di beberapa device)
-          const input = inst && inst.input; // <input class="select-dropdown">
-          function openDropdownNoScroll(e){
-            e.preventDefault();
-            e.stopPropagation();
-            inst.dropdown.open();
-            inst.dropdown.recalculateDimensions();
-            const dd = inst.dropdown.dropdownEl;
-            try { dd?.focus?.({ preventScroll: true }); } catch(_) {}
-            requestAnimationFrame(setHeight);
-          }
-          input && input.addEventListener('touchstart', openDropdownNoScroll, { passive:false });
-          input && input.addEventListener('mousedown', openDropdownNoScroll);
-
-          // Render awal + handler perubahan
+          
+          setTimeout(() => {
+            const inst = M.FormSelect.getInstance(select);
+            inst && inst.dropdown && inst.dropdown.recalculateDimensions();
+          }, 0);
           renderSankey(select.value || 'All');
+
           select.addEventListener('change', (e) => {
-            e.stopPropagation();
+            e.stopPropagation();                
             renderSankey(e.target.value);
           });
 
-          // Responsif & rotasi
-          new ResizeObserver(() => Plotly.Plots.resize(el)).observe(el);
-          window.addEventListener('orientationchange', () => {
-            setTimeout(() => {
-              inst?.dropdown?.recalculateDimensions();
-              Plotly.Plots.resize(el);
-              setHeight();
-            }, 300);
-          });
+          // responsif
+          const ro = new ResizeObserver(() => Plotly.Plots.resize(el));
+          ro.observe(el);
         }
         function clearActive(){
           cards.forEach(c => c.classList.remove('active'));

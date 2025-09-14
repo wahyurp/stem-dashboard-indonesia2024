@@ -1287,7 +1287,7 @@ card_html = """
               marker: { line: { color: "white", width: 0.5 } },
               colorbar: { title: "STEM Graduates" },
 
-              hovertemplate: "<b>%{location}</b><br>Share in STEM jobs: %{z:.2f}%<extra></extra>"
+              hovertemplate: "<b>%{location}</b><br>STEM Graduates in STEM Jobs: %{z:.2f}%<extra></extra>"
             }],
             {
               geo: { fitbounds: "geojson", visible: false },

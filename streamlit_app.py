@@ -617,6 +617,54 @@ card_html = """
       ul.select-dropdown li.optgroup:hover {
         background-color: transparent !important;
       }
+      
+      .table-wrap{
+        max-height: 420px;          /* tinggi viewport tabel */
+        overflow: auto;              /* body tabel yg scroll */
+        position: relative;          /* referensi sticky */
+      }
+
+      .table-wrap table{
+        border-collapse: separate;   /* penting agar sticky rapi */
+        border-spacing: 0;
+      }
+
+      /* Header nempel di atas saat scroll */
+      .table-wrap thead th,
+      .table-wrap thead td{
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        background: #ffffff;         /* warna latar header */
+        box-shadow: 0 1px 0 rgba(0,0,0,.06); /* garis pemisah halus */
+      }
+
+      /* (Opsional) Kolom pertama ikut sticky saat scroll horizontal */
+      .table-wrap tbody th:first-child,
+      .table-wrap tbody td:first-child{
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: #ffffff;
+        box-shadow: 1px 0 0 rgba(0,0,0,.06);
+      }
+      /* Persimpangan header x kolom-pertama */
+      .table-wrap thead th:first-child{
+        left: 0;
+        z-index: 4;
+      }
+
+      /* --- Override Materialize: jangan sembunyikan thead di layar kecil --- */
+      @media (max-width: 992px){
+        table.responsive-table thead{ display: table-header-group !important; }
+        table.responsive-table tbody tr{ display: table-row !important; }
+        table.responsive-table td,
+        table.responsive-table th{ display: table-cell !important; }
+      }
+
+      /* Jika header terlihat “terpotong”, hilangkan clipping dari item popout */
+      /* .collapsible.popout > li{ overflow: visible; }  */
+
 
       
     </style>

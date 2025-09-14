@@ -613,28 +613,7 @@ card_html = """
       ul.select-dropdown li.optgroup:hover {
         background-color: transparent !important;
       }
-
-      #sankey-panel { position: relative; }
-
-      #sankey-panel .input-field{
-        position: relative;
-        z-index: 1001;     /* pastikan di atas chart */
-        margin-bottom: 12px;
-      }
-
-      #sankey-chart{
-        position: relative;
-        z-index: 1;        /* chart di bawah input */
-      }
-
-      .select-dropdown.dropdown-content{
-        z-index: 2000 !important;
-      }
-
-      .input-field > label{
-        pointer-events: none;
-      }
-
+      
     </style>
   </head>
   <body>
@@ -1173,28 +1152,20 @@ card_html = """
 
           M.FormSelect.init(select, {
             dropdownOptions: {
-              container: document.body,
+              container: document.body,   
               coverTrigger: false,
               constrainWidth: false,
               alignment: 'left',
               closeOnClick: true
             }
           });
-
-          select.addEventListener('mousedown', (e) => {
-            const ua = navigator.userAgent;
-            const isSafari = /Safari/i.test(ua) && !/Chrome|Chromium/i.test(ua);
-            if (isSafari) {
-              e.preventDefault(); e.stopPropagation();
-              const inst = M.FormSelect.getInstance(select);
-              inst && inst.dropdown && inst.dropdown.open();
-            }
-          });
-
+          
           setTimeout(() => {
             const inst = M.FormSelect.getInstance(select);
             inst && inst.dropdown && inst.dropdown.recalculateDimensions();
           }, 0);
+          renderSankey(select.value || 'All');
+
           select.addEventListener('change', (e) => {
             e.stopPropagation();                
             renderSankey(e.target.value);

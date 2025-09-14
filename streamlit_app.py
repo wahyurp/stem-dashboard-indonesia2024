@@ -614,6 +614,11 @@ card_html = """
         background-color: transparent !important;
       }
 
+      /* --- iPad Safari select fixes --- */
+      #sankey-panel { position: relative; } /* supaya stacking context jelas */
+      .select-dropdown.dropdown-content { z-index: 3000 !important; } /* di atas Plotly */
+      .input-field > label { pointer-events: none; } /* cegah klik label memicu fokus select tersembunyi */
+
       
     </style>
   </head>
@@ -1048,15 +1053,10 @@ card_html = """
           M.Collapsible.init(elems, {
             accordion: false,
             onOpenEnd: (el) => {
-              // jika panel yang dibuka berisi sankey, render/resize di sini
               const holder = el.querySelector('#sankey-chart');
               if (holder) {
-                if (!sankeyReady) {
-                  setupSankey();      
-                  sankeyReady = true;
-                } else {
-                  Plotly.Plots.resize(holder);  
-                }
+                if (!sankeyReady) { setupSankey(); sankeyReady = true; }
+                else { Plotly.Plots.resize(holder); }
               }
               if (el.querySelector('#gen-table')) {
                 decorateTableByHeader({
@@ -1099,6 +1099,7 @@ card_html = """
                   });
                 }
               requestAnimationFrame(setHeight);
+              setTimeout(setHeight, 350);
             },
             onCloseEnd: () => requestAnimationFrame(setHeight)
           });
@@ -1151,31 +1152,81 @@ card_html = """
           const el = document.getElementById('sankey-chart');
           if(!select || !el) return;
 
+          // Deteksi iPad/iOS Safari (termasuk iPadOS yang lapor "MacIntel")
+          const ua = navigator.userAgent;
+          const isIOS = /iPad|iPhone|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+          const isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|CriOS/i.test(ua);
+          const needsIOSFix = isIOS && isSafari;
+
+          // Inisialisasi Materialize select
           M.FormSelect.init(select, {
             dropdownOptions: {
-              container: document.body,   
+              container: document.body,   // taruh di body agar tidak clipped
               coverTrigger: false,
               constrainWidth: false,
               alignment: 'left',
-              closeOnClick: true
+              closeOnClick: true,
+              onOpenStart: () => {
+                const inst = M.FormSelect.getInstance(select);
+                inst?.dropdown?.recalculateDimensions();
+                setHeight();
+              },
+              onOpenEnd: () => setHeight()
             }
           });
-          
-          setTimeout(() => {
-            const inst = M.FormSelect.getInstance(select);
-            inst && inst.dropdown && inst.dropdown.recalculateDimensions();
-          }, 0);
+          const inst = M.FormSelect.getInstance(select);
+
+          // Buka dropdown secara programatik di iOS Safari agar tidak auto-scroll/top-jump
+          function openDropdownNoScroll(e){
+            e.preventDefault();
+            e.stopPropagation();
+            inst.dropdown.open();
+            inst.dropdown.recalculateDimensions();
+            // Fokus ke menu tanpa menggulir halaman
+            const dd = inst.dropdown.dropdownEl;
+            if (dd && dd.focus) {
+              try { dd.focus({ preventScroll: true }); } catch(_) { /* iOS < 13 ignore */ }
+            }
+            requestAnimationFrame(setHeight);
+          }
+
+          if (needsIOSFix) {
+            // Intersep interaksi pada select & label
+            select.addEventListener('touchstart', openDropdownNoScroll, { passive: false });
+            select.addEventListener('mousedown', openDropdownNoScroll);
+
+            const lbl = document.querySelector('label[for="sankey-filter"]');
+            if (lbl) {
+              lbl.addEventListener('touchstart', openDropdownNoScroll, { passive: false });
+              lbl.addEventListener('click', openDropdownNoScroll);
+            }
+          }
+
+          // Recalc setelah render awal
+          setTimeout(() => inst?.dropdown?.recalculateDimensions(), 0);
+
+          // Render bagan awal
           renderSankey(select.value || 'All');
 
+          // Ubah data saat pilihan berubah
           select.addEventListener('change', (e) => {
-            e.stopPropagation();                
+            e.stopPropagation();
             renderSankey(e.target.value);
           });
 
-          // responsif
-          const ro = new ResizeObserver(() => Plotly.Plots.resize(el));
-          ro.observe(el);
+          // Responsif terhadap perubahan ukuran kontainer
+          new ResizeObserver(() => Plotly.Plots.resize(el)).observe(el);
+
+          // Orientasi iPad berubah => hitung ulang posisi dropdown & resize chart
+          window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+              inst?.dropdown?.recalculateDimensions();
+              Plotly.Plots.resize(el);
+              setHeight();
+            }, 300);
+          });
         }
+
         function clearActive(){
           cards.forEach(c => c.classList.remove('active'));
           activeId = null;

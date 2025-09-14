@@ -591,6 +591,28 @@ card_html = """
       .collapsible-body table.responsive-table tbody tr:last-child th{
         font-weight: 700 !important;
       }
+
+
+      ul.select-dropdown li:not(.optgroup):not(.disabled) > span {
+        color: #3498db !important;
+        cursor: pointer;
+      }
+
+      ul.select-dropdown li.optgroup > span {
+        color: #6b7280 !important;
+        font-weight: 700;
+      }
+
+      ul.select-dropdown li:not(.optgroup):hover {
+        background-color: rgba(52,152,219,.08) !important;
+      }
+      ul.select-dropdown li.selected:not(.optgroup) {
+        background-color: rgba(52,152,219,.12) !important;
+      }
+
+      ul.select-dropdown li.optgroup:hover {
+        background-color: transparent !important;
+      }
     </style>
   </head>
   <body>
@@ -809,7 +831,7 @@ card_html = """
                         <option value="Nusa Tenggara, Maluku, Papua">Nusa Tenggara, Maluku, Papua</option>
                       </optgroup>
                     </select>
-                    <label>Filters</label>
+                    <label for="sankey-filter">Filters</label>
                   </div>
                   <div id="sankey-chart" style="width:100%;height:420px;"></div>
                 </div>
@@ -1108,6 +1130,7 @@ card_html = """
 
           const trace = {
             type: 'sankey',
+            valueformat: '.2f',
             node: { pad:20, thickness:20, label:nodes, line:{color:'#000', width:0.5} },
             link: { ...link, color: linkColors }
           };
@@ -1126,7 +1149,20 @@ card_html = """
           const el = document.getElementById('sankey-chart');
           if(!select || !el) return;
 
-          M.FormSelect.init(select);
+          M.FormSelect.init(select, {
+            dropdownOptions: {
+              container: document.body,   
+              coverTrigger: false,
+              constrainWidth: false,
+              alignment: 'left',
+              closeOnClick: true
+            }
+          });
+          
+          setTimeout(() => {
+            const inst = M.FormSelect.getInstance(select);
+            inst && inst.dropdown && inst.dropdown.recalculateDimensions();
+          }, 0);
           renderSankey(select.value || 'All');
 
           select.addEventListener('change', (e) => {

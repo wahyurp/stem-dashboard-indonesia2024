@@ -1285,7 +1285,7 @@ card_html = """
               z,
               colorscale: SCALE_BLUE,
               marker: { line: { color: "white", width: 0.5 } },
-              colorbar: { title: "% STEM Graduates in STEM Jobs" },
+              colorbar: { title: "" },
 
               hovertemplate: "<b>%{location}</b><br>STEM Graduates in STEM Jobs: %{z:.2f}%<extra></extra>"
             }],

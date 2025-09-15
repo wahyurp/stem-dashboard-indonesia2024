@@ -720,7 +720,7 @@ card_html = """
 
 
       .content-wrap .title-row .download-btn{
-        color: #9e9e9e !important; 
+        color: #3498db !important; 
       }
       .content-wrap .title-row .download-btn i.material-icons{
         color: inherit !important;
@@ -730,7 +730,7 @@ card_html = """
         background-color: rgba(158,158,158,.12) !important;
       }
       .content-wrap .title-row .download-btn:focus-visible{
-        outline: 2px solid #9e9e9e; outline-offset: 2px;
+        outline: 2px solid #3498db; outline-offset: 2px;
       }
 
       .waves-effect .waves-ripple{

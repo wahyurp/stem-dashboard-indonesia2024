@@ -686,33 +686,56 @@ card_html = """
         .map-download { top: 8px; right: 8px; }
       }
 
+
       .content-wrap .title-row{
         display:flex;
         justify-content:center;
-        align-items:baseline;       /* baseline agar sejajar */
-        gap:.35em;
       }
-
       .content-wrap .title-row .title-text{
-        /* kamu sudah pakai 2.8rem; biarkan atau sesuaikan */
-        display:inline-flex;
+        display:flex;
         align-items:baseline;
-        gap:.35em;
+        justify-content:center;
+        gap:.35em;                
+        text-align:center;         
       }
 
-      /* KUNCI: biar tombol mewarisi ukuran font judul */
+
       .content-wrap .title-row .btn-flat.download-btn{
-        font-size: 1em !important;  /* 1em = font-size .title-text (mis. 2.8rem) */
-        height:auto; line-height:1;
-        min-height:0; padding:0 .15em;
+        font-size:1em !important;  
+        height:auto; line-height:1; min-height:0; padding:0 .15em;
       }
-
-      /* Ikon pakai 1em agar sama besar dengan teks judul */
       .content-wrap .title-row .btn-flat.download-btn i.material-icons{
-        font-size: 1em !important;  /* match text */
-        transform: translateY(.07em); /* sedikit turun supaya pas baseline */
+        font-size:1em !important;
+        transform:translateY(.07em);
       }
 
+
+      @media (max-width: 720px){  
+        .content-wrap .title-row .title-text{
+          flex-direction:column;
+          align-items:center;
+          gap:.25em;
+        }
+      }
+
+
+      .content-wrap .title-row .download-btn{
+        color: #9e9e9e !important; 
+      }
+      .content-wrap .title-row .download-btn i.material-icons{
+        color: inherit !important;
+      }
+
+      .content-wrap .title-row .download-btn:hover{
+        background-color: rgba(158,158,158,.12) !important;
+      }
+      .content-wrap .title-row .download-btn:focus-visible{
+        outline: 2px solid #9e9e9e; outline-offset: 2px;
+      }
+
+      .waves-effect .waves-ripple{
+        background-color: rgba(158,158,158,.35) !important;
+      }
 
 
     </style>
@@ -765,15 +788,15 @@ card_html = """
         <div class="content-wrap" style="margin-top:10%; margin-bottom:10%;">
           <div class="title-row">
             <div class="title-text blue-text" id="topic-title">
-              <span>Map of Percentage of STEM University Graduates 2024</span>
+              Map of Percentage of STEM University Graduates 2024
               <a id="prov-csv-btn"
                 class="btn-flat waves-effect download-btn"
-                title="Download CSV"
-                aria-label="Download Province CSV">
+                title="Download CSV" aria-label="Download Province CSV">
                 <i class="material-icons">file_download</i>
               </a>
             </div>
           </div>
+
 
 
           <div class="map-wrap">

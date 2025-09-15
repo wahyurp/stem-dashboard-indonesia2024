@@ -211,14 +211,16 @@ legend_html = """
   <span class="chip chip-red"></span> RSE≥50%
 </div>
 """
-overview_csv_gen = df_gen.to_csv(index=False)
+overview_csv_gen = df_gen.to_csv(index=False, na_rep='NA')
 
 overview_html_gen = df_gen.head(60).to_html(
     index=False,
     border=0,
     classes="striped highlight responsive-table",
-    table_id="gen-table"  
+    table_id="gen-table",
+    na_rep='NA'
 )
+
 overview_html_gen += legend_html
 
 
@@ -240,13 +242,14 @@ legend_html = """
   <span class="chip chip-red"></span> RSE≥50%
 </div>
 """
-overview_csv_age = df_age.to_csv(index=False)
+overview_csv_age = df_age.to_csv(index=False, na_rep='NA')
 
 overview_html_age = df_age.head(60).to_html(
     index=False,
     border=0,
     classes="striped highlight responsive-table",
-    table_id="age-table"  
+    table_id="age-table",
+    na_rep='NA'  
 )
 overview_html_age += legend_html
 
@@ -269,13 +272,14 @@ legend_html = """
   <span class="chip chip-red"></span> RSE≥50%
 </div>
 """
-overview_csv_disability = df_disability.to_csv(index=False)
+overview_csv_disability = df_disability.to_csv(index=False, na_rep='NA')
 
 overview_html_disability = df_disability.head(60).to_html(
     index=False,
     border=0,
     classes="striped highlight responsive-table",
-    table_id="disability-table"  
+    table_id="disability-table",
+    na_rep='NA'  
 )
 overview_html_disability += legend_html
 
@@ -290,8 +294,8 @@ csv_filename_disability = "Percentage of STEM University Graduates by Age Group 
 
 df_edunocup = pd.read_excel("data.xlsx", sheet_name="edunocup")
 
-overview_csv_edunocup = df_edunocup.to_csv(index=False)
-overview_html_edunocup = df_edunocup.head(60).to_html(index=False, border=0, classes="striped highlight responsive-table")
+overview_csv_edunocup = df_edunocup.to_csv(index=False, na_rep='NA')
+overview_html_edunocup = df_edunocup.head(60).to_html(index=False, border=0, classes="striped highlight responsive-table",na_rep='NA')
 
 overview_html_edunocup_js = _to_js_tpl_literal(overview_html_edunocup)
 
@@ -618,11 +622,11 @@ card_html = """
         background-color: transparent !important;
       }
 
-      /* ===== Desktop (≥ 992px): header sticky + tabel normal ===== */
+
       @media (min-width: 992px){
         .table-wrap{
-          max-height: 420px;        /* viewport tabel */
-          overflow: auto;           /* body yang scroll */
+          max-height: 420px;     
+          overflow: auto;        
           position: relative;
         }
         .table-wrap table{
@@ -638,7 +642,7 @@ card_html = """
           background: #ffffff;
           box-shadow: 0 1px 0 rgba(0,0,0,.06);
         }
-        /* (opsional) kolom pertama juga sticky saat scroll horizontal */
+
         .table-wrap tbody th:first-child,
         .table-wrap tbody td:first-child{
           position: sticky;
@@ -656,13 +660,11 @@ card_html = """
         table.responsive-table th{ display: table-cell !important; }
       }
 
-      /* ===== Mobile & tablet (< 992px): non-sticky, biar Materialize mode stacked ===== */
       @media (max-width: 991.98px){
         .table-wrap{
           max-height: none;
           overflow: visible;
         }
-        /* Jangan paksa thead tampil di mobile — biarkan default Materialize */
       }
 
     </style>
@@ -713,13 +715,13 @@ card_html = """
           </div>
         </div>
         <div class="content-wrap" style="margin-top:10%; margin-bottom:10%;">
-         <div class="title-text blue-text" id="topic-title">Map STEM Graduates in STEM Jobs</div>
+         <div class="title-text blue-text" id="topic-title">Map of Percentage of STEM University Graduates 2024</div>
           <div id="choropleth" style="width:100%;height:500px;"></div>
           <div style="background-color:#f0f0f0; padding:20px; border-radius:10px;
               box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
               font-size:18px; font-style:italic; color:#333;
               width:80%; margin:40px auto; text-align:center;">
-              “In 2024, the distribution of STEM graduates in Indonesia shows that the largest shares are concentrated in provinces like <b>Jawa Barat (16.73%)</b> and <b>Jawa Timur (12.99%)</b>, reflecting the dominance of Java as the country’s STEM hub. Male and female shares are relatively balanced with provincial differences. ”
+              “In 2024, the distribution of STEM graduates in Indonesia shows that the largest shares are concentrated in provinces like <b> Jawa Barat (16.74%) </b> and <b>Jawa Timur (12.92%)</b>, reflecting the dominance of Java as the country’s STEM hub. Male and female shares are relatively balanced with provincial differences.”
           </div>
         </div>
       </div>
@@ -782,7 +784,7 @@ card_html = """
                 </div>
                 <div class="col s12 m7 l8">
                   <blockquote class="quote-block gray-text flow-text">
-                    Most STEM university graduates are absorbed into employment (79.39%), yet a striking mismatch persists as only 18.39% work in STEM-related jobs while the majority (61.00%) shift to non-STEM fields. Male graduates show higher employment rates (86.21%) and better alignment with STEM jobs (21.09%) compared to females, who face lower employment (73.56%), higher unemployment (25.62%), and weaker STEM job integration (16.09%).
+                    Most STEM university graduates are absorbed into employment (80.89%), yet a striking mismatch persists as only 27.77% work in STEM-related jobs while the majority (53.12%) shift to non-STEM fields. Male graduates show higher employment rates (87.11%) and lower alignment with STEM jobs (25.17%) compared to females, who face lower employment (74.67%), but better STEM job integration (30.36%). 
                   </blockquote>
                 </div>
               </div>
@@ -836,9 +838,7 @@ card_html = """
               box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
               font-size:18px; font-style:italic; color:#333;
               width:80%; margin:40px auto; text-align:center;">
-              “Beyond the overall STEM talent underutilization, women experience a double disadvantage,
-                highlighting the need for stronger industry-academia linkages and gender-inclusive policies
-                to maximize STEM potential in the labor market.”
+              “STEM graduates often face job mismatch, as men find work more easily outside the field while women encounter higher barriers but greater alignment within STEM.”
             </div>`,
           c2:`<div style="background-color:#f0f0f0; padding:20px; border-radius:10px;
               box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
@@ -1337,7 +1337,7 @@ card_html = """
               marker: { line: { color: "white", width: 0.5 } },
               colorbar: { title: "" },
 
-              hovertemplate: "<b>%{location}</b><br>STEM Graduates in STEM Jobs: %{z:.2f}%<extra></extra>"
+              hovertemplate: "<b>%{location}</b><br>Percentage of STEM University Graduates : %{z:.2f}%<extra></extra>"
             }],
             {
               geo: { fitbounds: "geojson", visible: false },
@@ -1394,20 +1394,22 @@ card_html = card_html.replace("__OVERVIEW_EDUNOCUP_HTML__", overview_html_edunoc
 card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
 
-df_js = df_edunocup[["Province", "STEM Graduates in STEM Jobs"]].copy()
+
+df_province_dist = pd.read_excel("data.xlsx", sheet_name="province_dist")
+df_js = df_province_dist[["Province", "Total"]].copy()
 if df_js['Province'].iloc[-1].strip().casefold() == 'indonesia':
     df_js = df_js.iloc[:-1]
 df_js["Province"] = df_js["Province"].replace(province_name_mapping)
 
 data_dict = {
     "locations": df_js["Province"].tolist(),
-    "values": df_js["STEM Graduates in STEM Jobs"].tolist()
+    "values": df_js["Total"].tolist()
 }
 
 geojson_str = json.dumps(indonesia_geojson, ensure_ascii=False)
 data_map = {
     "locations": df_js["Province"].tolist(),  
-    "values": df_js["STEM Graduates in STEM Jobs"].tolist()
+    "values": df_js["Total"].tolist()
 }
 card_html = card_html.replace("__GEOJSON__", geojson_str)
 card_html = card_html.replace("__MAPDATA__", json.dumps(data_map, ensure_ascii=False))

@@ -303,6 +303,14 @@ overview_csv_edunocup_js = _to_js_tpl_literal(overview_csv_edunocup)
 csv_filename_edunocup = "University Graduates by Education and Occupation in STEM 2024.csv"
 
 
+df_province_dist = pd.read_excel("data.xlsx", sheet_name="province_dist")
+
+csv_prov = df_province_dist.to_csv(index=False, na_rep='NA')
+csv_prov_js = _to_js_tpl_literal(csv_prov)  # escape backtick & slash biar aman di template literal JS
+csv_prov_filename = "STEM_Graduates_Province_Distribution_2024.csv"
+
+
+
 
 ## ============= Choropleth Map =============
 province_name_mapping = {
@@ -667,6 +675,46 @@ card_html = """
         }
       }
 
+      .map-wrap { position: relative; }
+      .map-download {
+        position: absolute;
+        top: 10px; right: 10px;
+        z-index: 12;                
+        background: #2196f3;        
+      }
+      @media (max-width: 600px){
+        .map-download { top: 8px; right: 8px; }
+      }
+
+      .content-wrap .title-row{
+        display:flex;
+        justify-content:center;
+        align-items:baseline;       /* baseline agar sejajar */
+        gap:.35em;
+      }
+
+      .content-wrap .title-row .title-text{
+        /* kamu sudah pakai 2.8rem; biarkan atau sesuaikan */
+        display:inline-flex;
+        align-items:baseline;
+        gap:.35em;
+      }
+
+      /* KUNCI: biar tombol mewarisi ukuran font judul */
+      .content-wrap .title-row .btn-flat.download-btn{
+        font-size: 1em !important;  /* 1em = font-size .title-text (mis. 2.8rem) */
+        height:auto; line-height:1;
+        min-height:0; padding:0 .15em;
+      }
+
+      /* Ikon pakai 1em agar sama besar dengan teks judul */
+      .content-wrap .title-row .btn-flat.download-btn i.material-icons{
+        font-size: 1em !important;  /* match text */
+        transform: translateY(.07em); /* sedikit turun supaya pas baseline */
+      }
+
+
+
     </style>
   </head>
   <body>
@@ -715,8 +763,23 @@ card_html = """
           </div>
         </div>
         <div class="content-wrap" style="margin-top:10%; margin-bottom:10%;">
-         <div class="title-text blue-text" id="topic-title">Map of Percentage of STEM University Graduates 2024</div>
-          <div id="choropleth" style="width:100%;height:500px;"></div>
+          <div class="title-row">
+            <div class="title-text blue-text" id="topic-title">
+              <span>Map of Percentage of STEM University Graduates 2024</span>
+              <a id="prov-csv-btn"
+                class="btn-flat waves-effect download-btn"
+                title="Download CSV"
+                aria-label="Download Province CSV">
+                <i class="material-icons">file_download</i>
+              </a>
+            </div>
+          </div>
+
+
+          <div class="map-wrap">
+            <div id="choropleth" style="width:100%;height:500px;"></div>
+          </div>
+
           <div style="background-color:#f0f0f0; padding:20px; border-radius:10px;
               box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
               font-size:18px; font-style:italic; color:#333;
@@ -724,6 +787,7 @@ card_html = """
               “In 2024, the distribution of STEM graduates in Indonesia shows that the largest shares are concentrated in provinces like <b> Jawa Barat (16.74%) </b> and <b>Jawa Timur (12.92%)</b>, reflecting the dominance of Java as the country’s STEM hub. Male and female shares are relatively balanced with provincial differences.”
           </div>
         </div>
+
       </div>
     </div>
 
@@ -752,6 +816,11 @@ card_html = """
         const OVERVIEW_EDUNOCUP_HTML = `__OVERVIEW_EDUNOCUP_HTML__`;
         const CSV_EDUNOCUP_DATA = `__CSV_EDUNOCUP_DATA__`;
         const CSV_EDUNOCUP_FILENAME = `__CSV_EDUNOCUP_FILENAME__`;
+
+        
+        const CSV_PROV_DATA = `__CSV_PROV_DATA__`;
+        const CSV_PROV_FILENAME = `__CSV_PROV_FILENAME__`;
+        const CSV_PROV_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_PROV_DATA);
 
 
         const CSV_URL = 'data:text/csv;charset=utf-8,' + encodeURIComponent(CSV_DATA);
@@ -1349,6 +1418,14 @@ card_html = """
             { responsive: true }
           ).then(() => setHeight());
 
+          
+          const PROV_CSV_BTN = document.getElementById('prov-csv-btn');
+          if (PROV_CSV_BTN) {
+            PROV_CSV_BTN.href = CSV_PROV_URL;
+            PROV_CSV_BTN.setAttribute('download', CSV_PROV_FILENAME);
+          }
+
+
         CLOSE_BTN.addEventListener('click', function(){
           CLOSE_BAR.classList.remove('show');
           fadeOut(LIST, function(){ LIST.innerHTML = ""; setHeight(); });
@@ -1394,8 +1471,14 @@ card_html = card_html.replace("__OVERVIEW_EDUNOCUP_HTML__", overview_html_edunoc
 card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
 
+# inject placeholder ke template HTML
+card_html = card_html.replace("__CSV_PROV_DATA__", csv_prov_js)
+card_html = card_html.replace("__CSV_PROV_FILENAME__", csv_prov_filename)
 
-df_province_dist = pd.read_excel("data.xlsx", sheet_name="province_dist")
+# inject ke template
+card_html = card_html.replace("__CSV_PROV_DATA__", csv_prov_js)
+card_html = card_html.replace("__CSV_PROV_FILENAME__", csv_prov_filename)
+
 df_js = df_province_dist[["Province", "Total"]].copy()
 if df_js['Province'].iloc[-1].strip().casefold() == 'indonesia':
     df_js = df_js.iloc[:-1]

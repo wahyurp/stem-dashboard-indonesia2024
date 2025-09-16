@@ -739,13 +739,44 @@ card_html = """
       }
 
       
-      #sankey-toolbar{
-        display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap; margin-bottom:8px;
-      }
-      #sankey-download{ color:#3498db !important; }
+/* Baris kontrol: filter + tombol sejajar */
+#sankey-panel .sankey-controls{
+  display: flex;
+  align-items: flex-end;      /* sejajarkan ke bawah (garis input) */
+  gap: 12px;
+  flex-wrap: wrap;            /* biar bisa turun saat sempit */
+}
+
+/* Lebarkan filter agar label panjang muat */
+#sankey-filter-wrap{
+  flex: 1 1 460px;            /* basis 460px, grow & shrink */
+  min-width: 320px;
+  margin: 0;                  /* hilangkan margin default input-field */
+}
 
 
-      
+#sankey-panel .select-wrapper,
+#sankey-panel input.select-dropdown{
+  width: 100%;
+}
+
+
+#sankey-download{
+  flex: 0 0 auto;
+  margin: 0 0 6px 0;          /* sentuh garis bawah input */
+}
+
+/* Dropdown menu biar cukup lebar saat dibuka (opsional) */
+.dropdown-content.select-dropdown{
+  min-width: 420px;
+}
+
+/* Mobile: tombol turun ke bawah & full width */
+@media (max-width: 600px){
+  #sankey-filter-wrap{ flex: 1 1 100%; min-width: 0; }
+  #sankey-download{ width: 100%; margin: 6px 0 0 0; }
+}
+
 
     </style>
   </head>
@@ -969,8 +1000,8 @@ card_html = """
               raw:true, nowrap:true, 
               body: `
                 <div id="sankey-panel">
-                  <div id="sankey-toolbar">
-                    <div class="input-field" style="max-width:320px;margin:0;">
+                  <div class="sankey-controls">
+                    <div class="input-field" id="sankey-filter-wrap">
                       <select id="sankey-filter">
                         <option value="All" selected>All</option>
                         <optgroup label="— Sex —">
@@ -988,15 +1019,18 @@ card_html = """
                       <label for="sankey-filter">Filters</label>
                     </div>
 
-                    <!-- ikon download -->
-                    <a id="sankey-download" class="btn-flat waves-effect download-btn"
-                      title="Download Sankey (PNG). Alt-click untuk JPG" aria-label="Download Sankey PNG">
-                      <i class="material-icons">file_download</i>
+                    <!-- tombol biru -->
+                    <a id="sankey-download"
+                      class="btn btn-small blue waves-effect"
+                      title="Download Image (PNG). Alt-click untuk JPG"
+                      aria-label="Download Sankey PNG">
+                      Download Image
                     </a>
                   </div>
 
-                  <div id="sankey-chart" style="width:100%;height:420px;"></div>
+                  <div id="sankey-chart" style="width:100%;height:420px; margin-top:5%;"></div>
                 </div>
+
               `
             }
           ],
@@ -1336,10 +1370,13 @@ card_html = """
         function buildTitle(choice){
           const map = { Male:'Men', Female:'Women' };
           const who = map[choice] || choice; 
-          const titleFinal = `Distribution of STEM Graduates by Employment Status, 2024`;
-          if (who !== 'All') {
-            const titleFinal = `Distribution of STEM Graduates by Employment Status in ${who}, 2024`;
+          var titleFinal = ""
 
+          if (who !== 'All') {
+            titleFinal = `Distribution of STEM Graduates by Employment Status in ${who}, 2024`;
+
+          }else{
+            titleFinal = `Distribution of STEM Graduates by Employment Status, 2024`;
           }
           return titleFinal;
         }
@@ -1370,7 +1407,7 @@ card_html = """
 
           const layout = {
             width: 1200, height: 560,
-            margin: { l: 30, r: 30, t: 70, b: 70 },
+            margin: { l: 30, r: 30, t: 70, b: 80 },
             paper_bgcolor: '#ffffff',
             plot_bgcolor: '#ffffff',
             title: { text: buildTitle(choice), x: 0.5, xanchor: 'center', font: { size: 18, color: '#111' } }

@@ -709,14 +709,15 @@ card_html = """
         transform:translateY(.07em);
       }
 
-
-      @media (max-width: 720px){  
+      @media (max-width: 900px){
         .content-wrap .title-row .title-text{
-          flex-direction:column;
-          align-items:center;
-          gap:.25em;
+          flex-direction: column;
+          align-items: center;
+          gap: .25em;
         }
+        #prov-csv-btn{ margin-top: .25rem; }
       }
+
 
 
       .content-wrap .title-row .download-btn{
@@ -737,6 +738,14 @@ card_html = """
         background-color: rgba(158,158,158,.35) !important;
       }
 
+      
+      #sankey-toolbar{
+        display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap; margin-bottom:8px;
+      }
+      #sankey-download{ color:#3498db !important; }
+
+
+      
 
     </style>
   </head>
@@ -960,23 +969,32 @@ card_html = """
               raw:true, nowrap:true, 
               body: `
                 <div id="sankey-panel">
-                  <div class="input-field" style="max-width:320px;">
-                    <select id="sankey-filter">
-                      <option value="All" selected>All</option>
-                      <optgroup label="— Sex —">
-                        <option value="Female">Female</option>
-                        <option value="Male">Male</option>
-                      </optgroup>
-                      <optgroup label="— Region —">
-                        <option value="Sumatera">Sumatera</option>
-                        <option value="Jawa–Bali">Jawa–Bali</option>
-                        <option value="Kalimantan">Kalimantan</option>
-                        <option value="Sulawesi">Sulawesi</option>
-                        <option value="Nusa Tenggara, Maluku, Papua">Nusa Tenggara, Maluku, Papua</option>
-                      </optgroup>
-                    </select>
-                    <label for="sankey-filter">Filters</label>
+                  <div id="sankey-toolbar">
+                    <div class="input-field" style="max-width:320px;margin:0;">
+                      <select id="sankey-filter">
+                        <option value="All" selected>All</option>
+                        <optgroup label="— Sex —">
+                          <option value="Female">Female</option>
+                          <option value="Male">Male</option>
+                        </optgroup>
+                        <optgroup label="— Region —">
+                          <option value="Sumatera">Sumatera</option>
+                          <option value="Jawa–Bali">Jawa–Bali</option>
+                          <option value="Kalimantan">Kalimantan</option>
+                          <option value="Sulawesi">Sulawesi</option>
+                          <option value="Nusa Tenggara, Maluku, Papua">Nusa Tenggara, Maluku, Papua</option>
+                        </optgroup>
+                      </select>
+                      <label for="sankey-filter">Filters</label>
+                    </div>
+
+                    <!-- ikon download -->
+                    <a id="sankey-download" class="btn-flat waves-effect download-btn"
+                      title="Download Sankey (PNG). Alt-click untuk JPG" aria-label="Download Sankey PNG">
+                      <i class="material-icons">file_download</i>
+                    </a>
                   </div>
+
                   <div id="sankey-chart" style="width:100%;height:420px;"></div>
                 </div>
               `
@@ -1249,45 +1267,116 @@ card_html = """
 
         const SANKEY_MAP = __SANKEY_MAP__;
 
-
         function sankeyToPlotly(data) {
-          // data: [["source","target",value], ...]
+
           const nodes = [...new Set(data.flatMap(([s,t,_]) => [s,t]))];
           const index = Object.fromEntries(nodes.map((n,i)=>[n,i]));
-          return {
-            nodes,
-            link: {
-              source: data.map(([s]) => index[s]),
-              target: data.map(([,t]) => index[t]),
-              value:  data.map(([, ,v]) => v)
-            }
-          };
+          const source = data.map(([s]) => index[s]);
+          const target = data.map(([,t]) => index[t]);
+          const value  = data.map(([, ,v]) => +v);
+
+
+          const inTot  = new Array(nodes.length).fill(0);
+          const outTot = new Array(nodes.length).fill(0);
+          for (let i=0;i<value.length;i++){ inTot[target[i]]+=value[i]; outTot[source[i]]+=value[i]; }
+          const totals = inTot.map((v,i)=> v>0 ? v : outTot[i]);
+
+          const labelsPlain  = nodes;                                    
+          const labelsNumber = nodes.map((n,i)=> `${n}<br>${totals[i].toFixed(2)}`); 
+
+          return { nodes, link:{source,target,value}, totals, labelsPlain, labelsNumber };
         }
 
+
+        let currentChoice = 'All';
+        let sankeyCache = null;
+
         function renderSankey(choice='All'){
+          currentChoice = choice;
           const el = document.getElementById('sankey-chart');
           if(!el || typeof Plotly === 'undefined') return;
+
           const arr = SANKEY_MAP[choice] || SANKEY_MAP['All'];
-          const {nodes, link} = sankeyToPlotly(arr);
+          const {nodes, link, totals, labelsPlain, labelsNumber} = sankeyToPlotly(arr);
+          sankeyCache = {link, totals, labelsPlain, labelsNumber};
+
           const colors = ['#8dd3c7','#8CD5AE','#bebada','#E1A0A0','#DFC78C'];
           const linkColors = link.value.map((_, i) => colors[i % colors.length]);
 
           const trace = {
             type: 'sankey',
             valueformat: '.2f',
-            node: { pad:20, thickness:20, label:nodes, line:{color:'#000', width:0.5} },
-            link: { ...link, color: linkColors }
+            node: {
+              pad:20, thickness:20,
+              label: labelsPlain,
+              line:{color:'#000', width:0.5},
+              textfont:{size:13, color:'#111'},
+              customdata: totals,
+              hovertemplate: '%{label}<br>%{customdata:.2f}%<extra></extra>'
+            },
+            link: {
+              ...link,
+              color: linkColors,
+              hovertemplate: '%{value:.2f}%<extra></extra>'
+            }
           };
+
           const layout = {
-            margin:{l:0,r:0,t:8,b:8},
+            margin:{l:0,r:0,t:8,b:24},
             paper_bgcolor:'rgba(0,0,0,0)',
             plot_bgcolor:'rgba(0,0,0,0)',
-            height: 420
+            height: 420,
+            // TIDAK ADA title di mode web
           };
+
           Plotly.react(el, [trace], layout, {displayModeBar:false});
           requestAnimationFrame(setHeight);
         }
 
+        function buildTitle(choice){
+          const map = { Male:'Men', Female:'Women' };
+          const who = map[choice] || choice; 
+          const titleFinal = `Distribution of STEM Graduates by Employment Status, 2024`;
+          if (who !== 'All') {
+            const titleFinal = `Distribution of STEM Graduates by Employment Status in ${who}, 2024`;
+
+          }
+          return titleFinal;
+        }
+
+        function buildDownloadFigure(choice){
+          const arr = SANKEY_MAP[choice] || SANKEY_MAP['All'];
+          const { link, labelsNumber } = sankeyToPlotly(arr);
+
+          const colors = ['#8dd3c7','#8CD5AE','#bebada','#E1A0A0','#DFC78C'];
+          const linkColors = link.value.map((_, i) => colors[i % colors.length]);
+
+          const data = [{
+            type: 'sankey',
+            valueformat: '.2f',
+            node: {
+              pad: 28, thickness: 20,
+              label: labelsNumber,
+              line: { color: '#000', width: 0.5 },
+              textfont: { size: 14, color: '#111' },
+              hovertemplate: '%{label}<extra></extra>' // (tak penting untuk file)
+            },
+            link: {
+              ...link,
+              color: linkColors,
+              hovertemplate: '%{value:.2f}%<extra></extra>'
+            }
+          }];
+
+          const layout = {
+            width: 1200, height: 560,
+            margin: { l: 30, r: 30, t: 70, b: 70 },
+            paper_bgcolor: '#ffffff',
+            plot_bgcolor: '#ffffff',
+            title: { text: buildTitle(choice), x: 0.5, xanchor: 'center', font: { size: 18, color: '#111' } }
+          };
+          return { data, layout };
+        }
         function setupSankey(){
           const select = document.getElementById('sankey-filter');
           const el = document.getElementById('sankey-chart');
@@ -1314,7 +1403,29 @@ card_html = """
             renderSankey(e.target.value);
           });
 
-          // responsif
+          const dl = document.getElementById('sankey-download');
+          if (dl) {
+            dl.addEventListener('click', async (e) => {
+              e.preventDefault();
+              const fmt = e.altKey ? 'jpeg' : 'png';
+              const safe = String(currentChoice || 'All').replace(/[^\w\-]+/g,'_');
+              const { data, layout } = buildDownloadFigure(currentChoice);
+
+              const holder = document.createElement('div');
+              holder.style.cssText =
+                `position:fixed;left:-99999px;top:-99999px;width:${layout.width}px;height:${layout.height}px;opacity:0;pointer-events:none;`;
+              document.body.appendChild(holder);
+
+              try {
+                await Plotly.newPlot(holder, data, layout, { staticPlot: true, displayModeBar: false, responsive: false });
+                await Plotly.downloadImage(holder, { format: fmt, filename: `sankey_${safe}_2024`, width: layout.width, height: layout.height, scale: 2 });
+              } finally {
+                Plotly.purge(holder);
+                holder.remove();
+              }
+            });
+          }
+
           const ro = new ResizeObserver(() => Plotly.Plots.resize(el));
           ro.observe(el);
         }

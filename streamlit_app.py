@@ -287,7 +287,7 @@ overview_html_disability += legend_html
 overview_html_disability_js = _to_js_tpl_literal(overview_html_disability)
 
 overview_csv_disability_js = _to_js_tpl_literal(overview_csv_disability)
-csv_filename_disability = "Percentage of STEM University Graduates by Age Group 2024.csv"
+csv_filename_disability = "PPercentage of STEM University Graduates by Disability Condition 2024.csv"
 
 
 ## Education and Occupaction Overview Table
@@ -739,43 +739,42 @@ card_html = """
       }
 
       
-/* Baris kontrol: filter + tombol sejajar */
-#sankey-panel .sankey-controls{
-  display: flex;
-  align-items: flex-end;      /* sejajarkan ke bawah (garis input) */
-  gap: 12px;
-  flex-wrap: wrap;            /* biar bisa turun saat sempit */
-}
 
-/* Lebarkan filter agar label panjang muat */
-#sankey-filter-wrap{
-  flex: 1 1 460px;            /* basis 460px, grow & shrink */
-  min-width: 320px;
-  margin: 0;                  /* hilangkan margin default input-field */
-}
+      #sankey-panel .sankey-controls{
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
 
 
-#sankey-panel .select-wrapper,
-#sankey-panel input.select-dropdown{
-  width: 100%;
-}
+      #sankey-filter-wrap{
+        flex: 1 1 460px;
+        min-width: 320px;
+        margin: 0; 
+      }
 
 
-#sankey-download{
-  flex: 0 0 auto;
-  margin: 0 0 6px 0;          /* sentuh garis bawah input */
-}
+      #sankey-panel .select-wrapper,
+      #sankey-panel input.select-dropdown{
+        width: 100%;
+      }
 
-/* Dropdown menu biar cukup lebar saat dibuka (opsional) */
-.dropdown-content.select-dropdown{
-  min-width: 420px;
-}
 
-/* Mobile: tombol turun ke bawah & full width */
-@media (max-width: 600px){
-  #sankey-filter-wrap{ flex: 1 1 100%; min-width: 0; }
-  #sankey-download{ width: 100%; margin: 6px 0 0 0; }
-}
+      #sankey-download{
+        flex: 0 0 auto;
+        margin: 0 0 6px 0;
+      }
+
+
+      .dropdown-content.select-dropdown{
+        min-width: 420px;
+      }
+
+
+      @media (max-width: 600px){
+        #sankey-filter-wrap{ flex: 1 1 100%; min-width: 0; }
+        #sankey-download{ width: 100%; margin: 6px 0 0 0; }
+      }
 
 
     </style>

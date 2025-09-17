@@ -306,7 +306,7 @@ csv_filename_edunocup = "University Graduates by Education and Occupation in STE
 df_province_dist = pd.read_excel("data.xlsx", sheet_name="province_dist")
 
 csv_prov = df_province_dist.to_csv(index=False, na_rep='NA')
-csv_prov_js = _to_js_tpl_literal(csv_prov)  # escape backtick & slash biar aman di template literal JS
+csv_prov_js = _to_js_tpl_literal(csv_prov)
 csv_prov_filename = "STEM_Graduates_Province_Distribution_2024.csv"
 
 
@@ -412,7 +412,7 @@ components.html("""
       height:200px;
       overflow:hidden;
       line-height:0;
-      background:#2196f3; /* sama dengan hero agar menyatu */
+      background:#2196f3;
     }
     .wave-container svg { width:100%; height:100%; display:block; }
   </style>
@@ -476,7 +476,7 @@ components.html("""
   </svg>
 </div>
 
-  <!-- Setelah wave: putih (default body) -->
+
   <div class="section white">
     <div class="container">
       <!-- Konten lanjutan Anda di sini -->
@@ -484,7 +484,7 @@ components.html("""
     </div>
   </div>
 
-  <!-- Materialize JS (opsional untuk komponen interaktif) -->
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </body>
 </html>
@@ -1045,7 +1045,6 @@ card_html = """
           ]
         };
 
-        /* ==== Auto-resize iframe (lebih kuat) ==== */
         const ROOT = document.getElementById('wrap') || document.body;
 
         function setHeight(){
@@ -1065,14 +1064,13 @@ card_html = """
           if (window.frameElement) window.frameElement.style.height = h + "px";
         }
 
-        // Kick awal agresif (cegah “kalah start” sama iframe peta)
+
         let n = 0;
         const iv = setInterval(() => { setHeight(); if (++n > 20) clearInterval(iv); }, 80);
 
-        // Resize saat ukuran ROOT berubah
+
         new ResizeObserver(setHeight).observe(ROOT);
 
-        // Pantau perubahan DOM (buka/tutup collapsible, ganti konten, dll)
         new MutationObserver(setHeight).observe(ROOT, {
           childList: true, subtree: true, attributes: true
         });
@@ -1082,7 +1080,6 @@ card_html = """
         setTimeout(setHeight, 400);
         setTimeout(setHeight, 1200);
 
-        /* ==== Fade helpers ==== */
         function fadeOut(el, after){
           if(!el) return after && after();
           el.classList.add('fadeable', 'fade-hidden');
@@ -1097,7 +1094,7 @@ card_html = """
           setTimeout(setHeight, 320);
         }
 
-        /* ==== Collapsible builder ==== */
+
         function buildCollapsible(items){
           return items.map(it => {
             // Kumpulkan semua tombol yang perlu ditampilkan
@@ -1641,11 +1638,11 @@ card_html = card_html.replace("__OVERVIEW_EDUNOCUP_HTML__", overview_html_edunoc
 card_html = card_html.replace("__CSV_EDUNOCUP_DATA__", overview_csv_edunocup_js)
 card_html = card_html.replace("__CSV_EDUNOCUP_FILENAME__", csv_filename_edunocup)
 
-# inject placeholder ke template HTML
+
 card_html = card_html.replace("__CSV_PROV_DATA__", csv_prov_js)
 card_html = card_html.replace("__CSV_PROV_FILENAME__", csv_prov_filename)
 
-# inject ke template
+
 card_html = card_html.replace("__CSV_PROV_DATA__", csv_prov_js)
 card_html = card_html.replace("__CSV_PROV_FILENAME__", csv_prov_filename)
 

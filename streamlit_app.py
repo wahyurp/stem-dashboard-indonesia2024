@@ -287,7 +287,7 @@ overview_html_disability += legend_html
 overview_html_disability_js = _to_js_tpl_literal(overview_html_disability)
 
 overview_csv_disability_js = _to_js_tpl_literal(overview_csv_disability)
-csv_filename_disability = "PPercentage of STEM University Graduates by Disability Condition 2024.csv"
+csv_filename_disability = "Percentage of STEM University Graduates by Disability Condition 2024.csv"
 
 
 ## Education and Occupaction Overview Table
